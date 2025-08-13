@@ -1,0 +1,4 @@
+Options -Indexes
+# Custom Error Pages
+ErrorDocument 404 http://localhost/sistem_bkk/src/errors/404.html
+ErrorDocument 500 http://localhost/sistem_bkk/src/errors/500.html

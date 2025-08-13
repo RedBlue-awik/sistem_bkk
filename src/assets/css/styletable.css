@@ -1,0 +1,43 @@
+.dtr-details {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dtr-details li {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+    padding:6px 12px;
+    font-size: 0.97rem;
+}
+
+.dtr-details .dtr-title {
+    font-weight: bold;
+    min-width: 120px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.dtr-details .dtr-data {
+    flex: 1;
+    color: #212529;
+    word-break: break-word;
+}
+
+.dtr-details li:hover {
+    background: #d4d4d4;
+}
+
+.table {
+    border-radius: 7px 7px 0 0 !important;
+    overflow: hidden;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: 7px !important;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 7px !important;
+}
