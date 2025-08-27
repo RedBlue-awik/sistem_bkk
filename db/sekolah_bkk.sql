@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 11 Agu 2025 pada 13.42
+-- Waktu pembuatan: 27 Agu 2025 pada 20.07
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -55,7 +55,6 @@ CREATE TABLE `alumni` (
   `nisn` varchar(255) NOT NULL,
   `jurusan` varchar(255) NOT NULL,
   `tahun_lulus` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
   `telepon` varchar(255) NOT NULL,
   `alamat` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -64,11 +63,11 @@ CREATE TABLE `alumni` (
 -- Dumping data untuk tabel `alumni`
 --
 
-INSERT INTO `alumni` (`id_alumni`, `kode_alumni`, `nama`, `nisn`, `jurusan`, `tahun_lulus`, `email`, `telepon`, `alamat`) VALUES
-(7, 'S001', 'Daffa', '293385934', 'rpl', '2025-04-30', 'daffa@gmail.com', '0819-3584-7682', 'Lowayu'),
-(8, 'S002', 'Yazid', '318426324', 'rpl', '2025-06-01', 'yazid@gmail.com', '0874-5397-8236', 'Banyurip'),
-(10, 'S003', 'Sauqi', '04935873', 'kuliner', '2025-02-05', 'puqi123@gmail.com', '0896-4587-6546', 'Banyurip'),
-(25, 'S004', 'Awik', '123456789', 'rpl', '2000-02-20', 'awik@gmail.com', '0893-4587-8340', 'Ujung Pangkah');
+INSERT INTO `alumni` (`id_alumni`, `kode_alumni`, `nama`, `nisn`, `jurusan`, `tahun_lulus`, `telepon`, `alamat`) VALUES
+(7, 'S001', 'Daffa', '293385934', 'rpl', '2025-04-30', '0819-3584-7682', 'Lowayu'),
+(8, 'S002', 'Yazid', '318426324', 'rpl', '2025-06-01', '0874-5397-8236', 'Banyurip'),
+(10, 'S003', 'Sauqi', '04935873', 'kuliner', '2025-02-05', '0896-4587-6546', 'Banyurip'),
+(25, 'S004', 'Awik', '123456789', 'rpl', '2000-02-20', '0893-4587-8340', 'Ujung Pangkah');
 
 -- --------------------------------------------------------
 
@@ -90,7 +89,10 @@ CREATE TABLE `lamaran` (
 
 INSERT INTO `lamaran` (`id_lamaran`, `id_siswa`, `id_lowongan`, `tanggal_lamar`, `status`) VALUES
 (29, 8, 30, '2025-08-08', 'Diterima Kerja'),
-(30, 7, 74, '2025-08-11', 'Tidak Diterima Kerja');
+(30, 7, 74, '2025-08-11', 'Tidak Diterima Kerja'),
+(31, 8, 74, '2025-08-24', 'Menunggu'),
+(32, 8, 79, '2025-08-24', 'Menunggu'),
+(33, 7, 79, '2025-08-26', 'Menunggu');
 
 -- --------------------------------------------------------
 
@@ -101,27 +103,55 @@ INSERT INTO `lamaran` (`id_lamaran`, `id_siswa`, `id_lowongan`, `tanggal_lamar`,
 CREATE TABLE `log_login` (
   `id` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
-  `waktu_login` datetime DEFAULT current_timestamp()
+  `waktu_login` datetime NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `log_login`
 --
 
-INSERT INTO `log_login` (`id`, `id_user`, `waktu_login`) VALUES
-(2, 40, '2025-08-11 16:21:55'),
-(3, 35, '2025-08-11 16:22:23'),
-(4, 38, '2025-08-11 16:22:40'),
-(5, 40, '2025-08-11 16:24:17'),
-(6, 40, '2025-08-11 16:57:25'),
-(7, 38, '2025-08-11 16:57:38'),
-(8, 35, '2025-08-11 16:57:47'),
-(9, 40, '2025-08-11 17:46:48'),
-(10, 38, '2025-08-11 18:23:45'),
-(11, 40, '2025-08-11 18:24:01'),
-(12, 35, '2025-08-11 18:27:04'),
-(13, 40, '2025-08-11 18:27:45'),
-(14, 38, '2025-08-11 18:31:39');
+INSERT INTO `log_login` (`id`, `id_user`, `waktu_login`, `ip_address`, `user_agent`) VALUES
+(2, 40, '2025-08-13 01:55:55', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(5, 35, '2025-08-13 02:05:54', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(6, 40, '2025-08-13 02:14:08', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(7, 35, '2025-08-13 05:52:54', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(8, 35, '2025-08-13 05:55:48', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(9, 35, '2025-08-13 06:27:19', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(10, 40, '2025-08-13 06:27:46', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(11, 35, '2025-08-15 13:48:55', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(12, 35, '2025-08-17 11:07:47', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(13, 35, '2025-08-17 11:21:24', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(14, 38, '2025-08-17 12:15:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(15, 35, '2025-08-17 13:45:40', '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36'),
+(16, 40, '2025-08-17 14:26:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(17, 35, '2025-08-17 14:26:19', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(18, 40, '2025-08-17 14:31:09', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(19, 35, '2025-08-18 21:09:57', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(20, 35, '2025-08-18 21:14:38', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(21, 35, '2025-08-18 21:29:31', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(22, 35, '2025-08-18 21:39:15', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(23, 35, '2025-08-18 21:44:36', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(24, 35, '2025-08-18 21:45:39', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(25, 35, '2025-08-18 21:49:54', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(26, 35, '2025-08-18 21:51:44', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(27, 35, '2025-08-22 12:29:56', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(28, 35, '2025-08-22 12:30:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(29, 35, '2025-08-22 12:34:47', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(30, 35, '2025-08-22 12:40:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(31, 35, '2025-08-22 12:46:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(32, 35, '2025-08-23 22:10:59', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(33, 40, '2025-08-24 16:40:35', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(34, 35, '2025-08-24 18:38:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(35, 35, '2025-08-26 11:45:09', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(36, 35, '2025-08-26 11:46:24', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(37, 40, '2025-08-26 11:47:54', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(38, 35, '2025-08-26 13:37:40', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(39, 40, '2025-08-26 13:38:37', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(40, 40, '2025-08-26 14:49:16', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(41, 38, '2025-08-26 14:49:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(42, 35, '2025-08-28 00:02:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36');
 
 -- --------------------------------------------------------
 
@@ -147,8 +177,28 @@ CREATE TABLE `lowongan` (
 --
 
 INSERT INTO `lowongan` (`id_lowongan`, `id_perusahaan`, `judul`, `deskripsi`, `persyaratan`, `mata_uang`, `gaji`, `kpn_gaji_diberi`, `tanggal_dibuka`, `tanggal_ditutup`) VALUES
-(30, 2, 'Dev', 'Harus semangat', 'Lulusan IT,Bisa HTML CSS dan JS', 'Rp', '2.500.000', 'B', '2025-08-02', '2025-08-10'),
-(74, 6, 'Kasir', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'B', '2025-08-11', '2025-08-30');
+(30, 2, 'Dev', 'Harus semangat', 'Lulusan IT,Bisa HTML CSS dan JS', 'Rp', '2.500.000', 'B', '2025-08-02', '2025-08-13'),
+(74, 6, 'Kasir', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'B', '2025-08-11', '2025-08-30'),
+(79, 6, 'devDigital', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'M', '2025-08-24', '2025-08-27');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `online_users`
+--
+
+CREATE TABLE `online_users` (
+  `id` int(11) NOT NULL,
+  `id_user` int(11) NOT NULL,
+  `last_activity` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `online_users`
+--
+
+INSERT INTO `online_users` (`id`, `id_user`, `last_activity`) VALUES
+(40, 38, '2025-08-26 14:49:33');
 
 -- --------------------------------------------------------
 
@@ -172,7 +222,9 @@ CREATE TABLE `pengumuman` (
 INSERT INTO `pengumuman` (`id_pengumuman`, `judul`, `isi`, `tanggal`, `ditujukan`, `id_siswa`) VALUES
 (28, 'Selamat! Lamaran Diterima', 'Lamaran anda untuk posisi <b>Dev</b> telah <b>DITERIMA</b>.', '2025-08-09 15:36:02', 'khusus', 8),
 (29, 'Lowongan Baru Dibuka', 'Telah dibuka Lowongan baru di Perusahaan <b>Indomaret</b> dengan Judul : <b>Kasir</b>.', '2025-08-11 18:20:48', 'semua', NULL),
-(30, 'Maaf, Lamaran Tidak Diterima', 'Lamaran anda untuk posisi <b>Kasir</b> <b>TIDAK DITERIMA</b>.', '2025-08-11 18:27:24', 'khusus', 7);
+(30, 'Maaf, Lamaran Tidak Diterima', 'Lamaran anda untuk posisi <b>Kasir</b> <b>TIDAK DITERIMA</b>.', '2025-08-11 18:27:24', 'khusus', 7),
+(31, 'Lowongan Baru Dibuka', 'Telah dibuka Lowongan baru di Perusahaan <b>PT Teknologi Indonesia</b> dengan Judul : <b>Iure quisquam labore</b>.', '2025-08-18 21:10:27', 'semua', NULL),
+(39, 'Lowongan Baru Dibuka', 'Telah dibuka Lowongan baru di Perusahaan <b>Indomaret</b> dengan Judul : <b>devDigital</b>.', '2025-08-24 18:39:46', 'semua', NULL);
 
 -- --------------------------------------------------------
 
@@ -196,7 +248,14 @@ INSERT INTO `pengumuman_viewed` (`id`, `id_pengumuman`, `id_user`, `id_siswa`, `
 (184, 28, 40, 8, '2025-08-09 17:15:09'),
 (185, 29, 35, NULL, '2025-08-11 18:20:59'),
 (187, 29, 40, 8, '2025-08-11 18:24:08'),
-(188, 29, 38, 7, '2025-08-11 18:24:13');
+(188, 29, 38, 7, '2025-08-11 18:24:13'),
+(194, 31, 35, NULL, '2025-08-18 21:14:51'),
+(216, 39, 35, NULL, '2025-08-24 18:39:51'),
+(219, 31, 40, 8, '2025-08-24 18:39:55'),
+(220, 39, 40, 8, '2025-08-24 18:39:55'),
+(222, 30, 38, 7, '2025-08-26 14:50:02'),
+(223, 31, 38, 7, '2025-08-26 14:50:02'),
+(224, 39, 38, 7, '2025-08-26 14:50:02');
 
 -- --------------------------------------------------------
 
@@ -279,8 +338,7 @@ ALTER TABLE `lamaran`
 -- Indeks untuk tabel `log_login`
 --
 ALTER TABLE `log_login`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_user` (`id_user`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeks untuk tabel `lowongan`
@@ -288,6 +346,12 @@ ALTER TABLE `log_login`
 ALTER TABLE `lowongan`
   ADD PRIMARY KEY (`id_lowongan`),
   ADD KEY `id_perusahaan` (`id_perusahaan`);
+
+--
+-- Indeks untuk tabel `online_users`
+--
+ALTER TABLE `online_users`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeks untuk tabel `pengumuman`
@@ -325,43 +389,49 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT untuk tabel `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT untuk tabel `alumni`
 --
 ALTER TABLE `alumni`
-  MODIFY `id_alumni` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_alumni` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT untuk tabel `lamaran`
 --
 ALTER TABLE `lamaran`
-  MODIFY `id_lamaran` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id_lamaran` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT untuk tabel `log_login`
 --
 ALTER TABLE `log_login`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT untuk tabel `lowongan`
 --
 ALTER TABLE `lowongan`
-  MODIFY `id_lowongan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id_lowongan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+
+--
+-- AUTO_INCREMENT untuk tabel `online_users`
+--
+ALTER TABLE `online_users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengumuman`
 --
 ALTER TABLE `pengumuman`
-  MODIFY `id_pengumuman` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id_pengumuman` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengumuman_viewed`
 --
 ALTER TABLE `pengumuman_viewed`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=190;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=225;
 
 --
 -- AUTO_INCREMENT untuk tabel `perusahaan`
@@ -373,17 +443,11 @@ ALTER TABLE `perusahaan`
 -- AUTO_INCREMENT untuk tabel `user`
 --
 ALTER TABLE `user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
-
---
--- Ketidakleluasaan untuk tabel `log_login`
---
-ALTER TABLE `log_login`
-  ADD CONSTRAINT `log_login_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `pengumuman_viewed`
