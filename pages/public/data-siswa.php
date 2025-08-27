@@ -52,30 +52,6 @@ usort($studen, function ($a, $b) use ($id_user) {
     return ($b['id_user'] == $id_user) <=> ($a['id_user'] == $id_user);
 });
 
-
-if (isset($_GET['email']) && $_GET['email'] === 'duplikat') {
-    echo "
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            Swal.fire({
-                icon: 'warning',
-                title: 'PERINGATAN!',
-                text: 'Email Yang Anda Masukkan Sudah Terdaftar!',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menambahkan',
-                    text: 'Silahkan Gunakan Email Lain!',
-                }).then(() => {
-                    window.location.href = '../../pages/public/data-siswa.php';
-                });
-            });
-        });
-    </script>";
-}
-
 // Cek apakah tombol tambah di klik
 if (isset($_POST['tambah'])) {
 
@@ -249,7 +225,7 @@ include '../../src/template/headers.php';
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -329,9 +305,8 @@ include '../../src/template/headers.php';
                                             <thead class="table table-dark text-nowrap">
                                                 <tr>
                                                     <th>No</th>
-                                                    <th>Email</th>
-                                                    <th>Nama</th>
                                                     <th>Nisn</th>
+                                                    <th>Nama</th>
                                                     <th>Jurusan</th>
                                                     <th>Alamat</th>
                                                     <th>No Telepon</th>
@@ -345,9 +320,8 @@ include '../../src/template/headers.php';
                                                 foreach ($studen as $siswa) : ?>
                                                     <tr>
                                                         <td class="text-center fw-bold"><?= $no++; ?></td>
-                                                        <td><?= $siswa['email']; ?></td>
-                                                        <td><?= $siswa['nama']; ?></td>
                                                         <td><?= $siswa['nisn']; ?></td>
+                                                        <td><?= $siswa['nama']; ?></td>
                                                         <td><?= strtoupper($siswa['jurusan']); ?></td>
                                                         <td><?= $siswa['alamat']; ?></td>
                                                         <td><?= $siswa['telepon']; ?></td>
@@ -458,11 +432,7 @@ include '../../src/template/headers.php';
                                 <div class="input-group-text"><span class="fas fa-phone"></span></div>
                             </div>
                             <div class="input-group my-3">
-                                <div class="input-group-text"><span class="fas fa-envelope"></span></div>
-                                <div class="form-floating me-3">
-                                    <input id="email" type="email" name="email" class="form-control" placeholder="" required autocomplete="off" />
-                                    <label for="email" class="form-label">Email</label>
-                                </div>
+                                <div class="input-group-text"><span class="fas fa-user-pen"></span></div>
                                 <!-- <div class="form-floating">
                                     <input type="password" class="form-control" name="password" id="password" placeholder="" minlength="8" required autocomplete="off">
                                     <label for="password" class="form-label">Password</label>
@@ -595,11 +565,7 @@ include '../../src/template/headers.php';
                                     <div class="input-group-text"><span class="fas fa-phone"></span></div>
                                 </div>
                                 <div class="input-group my-3">
-                                    <div class="input-group-text"><span class="fas fa-envelope"></span></div>
-                                    <div class="form-floating me-3">
-                                        <input id="email<?= $siswa["id_alumni"]; ?>" type="email" name="email" class="form-control" placeholder="" value="<?= $siswa["email"]; ?>" required autocomplete="off" />
-                                        <label for="email<?= $siswa["id_alumni"]; ?>" class="form-label">Email</label>
-                                    </div>
+                                    <div class="input-group-text"><span class="fas fa-user-pen"></span></div>
                                     <!-- <div class="form-floating">
                                     <input type="password" class="form-control" name="password" id="password" placeholder="" minlength="8" required autocomplete="off">
                                     <label for="password" class="form-label">Password</label>

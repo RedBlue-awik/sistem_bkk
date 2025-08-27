@@ -33,19 +33,18 @@ if (isset($_POST['import'])) {
     $data = $spreadsheet->getActiveSheet()->toArray();
 
     for ($i = 1; $i < count($data); $i++) {
-        $email         = mysqli_real_escape_string($conn, $data[$i][0]);
+        $nisn          = mysqli_real_escape_string($conn, $data[$i][0]);
         $nama          = mysqli_real_escape_string($conn, $data[$i][1]);
-        $nisn          = mysqli_real_escape_string($conn, $data[$i][2]);
-        $jurusan       = mysqli_real_escape_string($conn, $data[$i][3]);
-        $alamat        = mysqli_real_escape_string($conn, $data[$i][4]);
-        $telepon       = mysqli_real_escape_string($conn, $data[$i][5]);
-        if (is_numeric($data[$i][6])) {
-            $tahun_lulus = Date::excelToDateTimeObject($data[$i][6])->format('Y-m-d');
+        $jurusan       = mysqli_real_escape_string($conn, $data[$i][2]);
+        $alamat        = mysqli_real_escape_string($conn, $data[$i][3]);
+        $telepon       = mysqli_real_escape_string($conn, $data[$i][4]);
+        if (is_numeric($data[$i][5])) {
+            $tahun_lulus = Date::excelToDateTimeObject($data[$i][5])->format('Y-m-d');
         } else {
-            $tahun_lulus = mysqli_real_escape_string($conn, $data[$i][6]);
+            $tahun_lulus = mysqli_real_escape_string($conn, $data[$i][5]);
         }
-        $username      = mysqli_real_escape_string($conn, $data[$i][7]);
-        $password      = isset($data[$i][8]) ? md5($data[$i][8]) : md5('default123');
+        $username      = mysqli_real_escape_string($conn, $data[$i][6]);
+        $password      = isset($data[$i][7]) ? md5($data[$i][7]) : md5('default123');
 
         // Buat kode_alumni unik
         $result = mysqli_query($conn, "SELECT kode_alumni FROM alumni ORDER BY kode_alumni ASC");
@@ -62,8 +61,8 @@ if (isset($_POST['import'])) {
         $kode_alumni = 'S' . str_pad($kodeBaru, 3, '0', STR_PAD_LEFT);
 
         // Insert ke tabel alumni
-        mysqli_query($conn, "INSERT INTO alumni (kode_alumni, nama, nisn, jurusan, tahun_lulus, email, telepon, alamat)
-                             VALUES ('$kode_alumni', '$nama', '$nisn', '$jurusan', '$tahun_lulus', '$email', '$telepon', '$alamat')");
+        mysqli_query($conn, "INSERT INTO alumni (kode_alumni, nama, nisn, jurusan, tahun_lulus, telepon, alamat)
+                             VALUES ('$kode_alumni', '$nama', '$nisn', '$jurusan', '$tahun_lulus', '$telepon', '$alamat')");
 
         // Insert ke tabel user (akun alumni)
         mysqli_query($conn, "INSERT INTO user (kode_pengguna, username, password, level)

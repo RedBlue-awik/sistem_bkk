@@ -211,7 +211,6 @@ function tambahSiswa($data)
 
 	$nisn = htmlspecialchars($data['nisn']);
 	$telepon = htmlspecialchars($data['telepon']);
-	$email = htmlspecialchars($data['email']);
 	$nama = htmlspecialchars($data['nama']);
 	$jurusan = htmlspecialchars($data['jurusan']);
 	$tahun_lulus = htmlspecialchars($data['tahun_lulus']);
@@ -219,12 +218,12 @@ function tambahSiswa($data)
 	$username = htmlspecialchars($data['username']);
 	$password = md5($data['password']);
 
-	// Cek apakah email sudah terdaftar
-	$cek = mysqli_query($conn, "SELECT email FROM alumni WHERE email = '$email'");
-	if (mysqli_fetch_assoc($cek)) {
-		header("Location: ../../pages/public/data-siswa.php?email=duplikat");
-		exit;
-	}
+	// // Cek apakah email sudah terdaftar
+	// $cek = mysqli_query($conn, "SELECT email FROM alumni WHERE email = '$email'");
+	// if (mysqli_fetch_assoc($cek)) {
+	// 	header("Location: ../../pages/public/data-siswa.php?email=duplikat");
+	// 	exit;
+	// }
 
 	// Ambil semua kode_alumni yang ada, urutkan ASC
 	$result = mysqli_query($conn, "SELECT kode_alumni FROM alumni ORDER BY kode_alumni ASC");
@@ -246,13 +245,13 @@ function tambahSiswa($data)
 	$kode_alumni = 'S' . str_pad($kodeBaru, 3, '0', STR_PAD_LEFT);
 
 	// Insert ke admin
-	$queryAlumni = "INSERT INTO alumni (kode_alumni, nama, nisn, jurusan, tahun_lulus, email, telepon, alamat)
-					   VALUES ('$kode_alumni', '$nama', '$nisn', '$jurusan', '$tahun_lulus', '$email', '$telepon', '$alamat')";
+	$queryAlumni = "INSERT INTO alumni (kode_alumni, nama, nisn, jurusan, tahun_lulus, telepon, alamat)
+					   VALUES ('$kode_alumni', '$nama', '$nisn', '$jurusan', '$tahun_lulus', '$telepon', '$alamat')";
 
 	if (mysqli_query($conn, $queryAlumni)) {
 		// Insert ke user (username, password, level, kode_pengguna)
 		$queryUser = "INSERT INTO user (username, password, level, kode_pengguna)
-					  VALUES ('$username', '$password', 'admin', '$kode_alumni')";
+					  VALUES ('$username', '$password', 'alumni', '$kode_alumni')";
 		mysqli_query($conn, $queryUser);
 	}
 
@@ -269,7 +268,6 @@ function editSiswa($data)
 	$id_alumni = $data['id_alumni'];
 	$nisn = htmlspecialchars($data['nisn']);
 	$telepon = htmlspecialchars($data['telepon']);
-	$email = htmlspecialchars($data['email']);
 	$nama = htmlspecialchars($data['nama']);
 	$jurusan = htmlspecialchars($data['jurusan']);
 	$tahun_lulus = htmlspecialchars($data['tahun_lulus']);
@@ -277,7 +275,7 @@ function editSiswa($data)
 
 	// Update data alumni
 	mysqli_query($conn, "UPDATE alumni 
-						 SET nama = '$nama', nisn = '$nisn', jurusan = '$jurusan', tahun_lulus = '$tahun_lulus', email = '$email', telepon = '$telepon', alamat = '$alamat' 
+						 SET nama = '$nama', nisn = '$nisn', jurusan = '$jurusan', tahun_lulus = '$tahun_lulus',telepon = '$telepon', alamat = '$alamat' 
 						 WHERE id_alumni = $id_alumni");
 
 	// Kembalikan nilai 1 jika berhasil, dan 0 jika gagal

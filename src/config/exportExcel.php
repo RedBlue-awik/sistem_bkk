@@ -23,7 +23,7 @@ $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 
 // Header kolom
-$headers = ['Email', 'Nama', 'NISN', 'Jurusan', 'Alamat', 'Telepon', 'Tahun Lulus', 'Username'];
+$headers = ['NISN', 'Nama', 'Jurusan', 'Alamat', 'Telepon', 'Tahun Lulus', 'Username'];
 $sheet->fromArray($headers, NULL, 'A1');
 
 // Format header
@@ -48,28 +48,27 @@ $headerStyle = [
         ],
     ],
 ];
-$sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+$sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
 
 // Isi data
 $row = 2;
 while ($data = mysqli_fetch_assoc($query)) {
-    $sheet->setCellValue("A$row", $data['email']);
+    $sheet->setCellValue("A$row", $data['nisn']);
     $sheet->setCellValue("B$row", $data['nama']);
-    $sheet->setCellValue("C$row", $data['nisn']);
-    $sheet->setCellValue("D$row", $data['jurusan']);
-    $sheet->setCellValue("E$row", $data['alamat']);
-    $sheet->setCellValue("F$row", $data['telepon']);
-    $sheet->setCellValue("G$row", $data['tahun_lulus']);
-    $sheet->setCellValue("H$row", $data['username']);
+    $sheet->setCellValue("C$row", $data['jurusan']);
+    $sheet->setCellValue("D$row", $data['alamat']);
+    $sheet->setCellValue("E$row", $data['telepon']);
+    $sheet->setCellValue("F$row", $data['tahun_lulus']);
+    $sheet->setCellValue("G$row", $data['username']);
 
     // Tambahkan border untuk tiap baris data
-    $sheet->getStyle("A1:H1")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle("A1:G1")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
     $row++;
 }
 
 $lastRow = $row - 1;
-$sheet->getStyle("A2:H{$lastRow}")->applyFromArray([
+$sheet->getStyle("A2:G{$lastRow}")->applyFromArray([
     'alignment' => [
         'horizontal' => Alignment::HORIZONTAL_CENTER,
         'vertical' => Alignment::VERTICAL_CENTER,
@@ -77,7 +76,7 @@ $sheet->getStyle("A2:H{$lastRow}")->applyFromArray([
 ]);
 
 // Otomatis atur lebar kolom
-foreach (range('A', 'H') as $col) {
+foreach (range('A', 'G') as $col) {
     $sheet->getColumnDimension($col)->setWidth(30);
 }
 

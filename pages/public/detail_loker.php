@@ -1,16 +1,8 @@
 <?php
 session_start();
 
-// Cek apakah sudah ada session login, jika sudah kembalikan
-if (!isset($_SESSION['id_pengguna'])) {
-    echo "
-        <script>
-            document.location.href = '../../index.php';
-        </script>
-    ";
-}
-
-require '../functions.php';
+require '../../src/functions.php';
+include '../../src/controller/LoginF.php';
 
 if (isset($_POST['kirim'])) {
     $id_alumni = $_POST['id_alumni'];
@@ -41,7 +33,7 @@ if (isset($_POST['kirim'])) {
 
     // Nama file custom: cv_{id_alumni}_{id_lowongan}.{ext}
     $nama_file = "cv_" . $id_alumni . "_" . $id_lowongan . "." . $ekstensi_file;
-    $folder_tujuan = "../assets/persyaratan/cv/";
+    $folder_tujuan = "../../src/assets/persyaratan/cv/";
 
     if (!is_dir($folder_tujuan)) {
         mkdir($folder_tujuan, 0777, true);
@@ -61,7 +53,7 @@ if (isset($_POST['kirim'])) {
                 title: 'Lamaran Dikirim',
                 text: 'Lamaran berhasil dikirim!',
               }).then(() => {
-                window.location.href = '../../pages/public/loker.php';
+                window.location.href = './loker.php';
               });
             </script>";
         } else {
@@ -152,7 +144,7 @@ $alamat = $data['alamat'];
 
 <?php
 $title = "Details-Lowongan";
-include '../template/headers.php';
+include '../../src/template/headers.php';
 ?>
 
 <style>
@@ -300,7 +292,7 @@ include '../template/headers.php';
                         <div class="row align-items-start g-3">
                             <div class="col-12 col-md-8 d-flex align-items-start gap-3 flex-wrap info-header">
                                 <div style="flex-shrink: 0;">
-                                    <img src="../assets/img/perusahaan/logo/<?= $data['logo'] ?>" alt="Logo Perusahaan" class="img-fluid" style="width: 90px; height: 90px; object-fit: contain;">
+                                    <img src="../../src/assets/img/perusahaan/logo/<?= $data['logo'] ?>" alt="Logo Perusahaan" class="img-fluid" style="width: 90px; height: 90px; object-fit: contain;">
                                 </div>
                                 <div>
                                     <h4 class="fw-bold mb-1"><?= $data['nama_perusahaan'] ?></h4>
@@ -318,7 +310,6 @@ include '../template/headers.php';
                                             <span class="text-danger fw-semibold"><i class="fa-regular fa-circle-xmark  me-1"></i>Lowongan ini telah ditutup</span>
                                         <?php elseif (strtotime($data['tanggal_dibuka']) > time()) : ?>
                                             <span class="text-muted" style="font-size: 12px;"><i class="bi bi-clock" style="font-size: 15px; margin-right: .33rem;"></i><?= $data['tanggal_dibuka'] ?> <?php $tanggal_dibuka = strtotime($data['tanggal_dibuka']);
-                                                                                                                                                                                                        $hari_ini = strtotime(date('Y-m-d'));
                                                                                                                                                                                                         $selisih_hari = ceil(($tanggal_dibuka - $hari_ini) / 86400); ?> <strong>Dibuka <?= $selisih_hari ?> Hari Lagi</strong></span>
                                             <span class="text-danger fw-semibold"><i class="fa-regular fa-clock fa-shake me-1"></i>Lowongan ini belum dibuka</span>
                                         <?php else : ?>
@@ -327,13 +318,15 @@ include '../template/headers.php';
                                     </div>
                                     <div class="mt-3">
                                         <?php if (strtotime($data['tanggal_ditutup']) < time()) : ?>
-                                            <a href="../../pages/public/loker.php" class="btn btn-sm px-5 btn-primary">Cari Lamaran Lainnya</a>
+                                            <a href="./loker.php" class="btn btn-sm px-5 btn-primary">Cari Lamaran Lainnya</a>
                                         <?php elseif (strtotime($data['tanggal_dibuka']) > time()) : ?>
-                                            <a href="../../pages/public/loker.php" class="btn btn-sm px-5 btn-primary">Cari Lamaran Lainnya</a>
-                                        <?php elseif ($_SESSION['level'] == 'alumni') : ?>
-                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $data['id_lowongan']; ?>" class="btn btn-sm px-5 btn-outline-primary">Lamar</a>
+                                            <a href="./loker.php" class="btn btn-sm px-5 btn-primary">Cari Lamaran Lainnya</a>
+                                        <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') : ?>
+                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $data['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
+                                        <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
+                                            <a href="../../logout.php" class="btn btn-sm btn-outline-primary">Khusus Alumni</a>
                                         <?php else : ?>
-                                            <a href="../../logout.php" class="btn btn-sm px-5 btn-outline-primary">Hanya untuk Alumni</a>
+                                            <a href="" data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-sm px-4 btn-outline-primary text-center"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -399,8 +392,8 @@ include '../template/headers.php';
                                                 <li class="mb-1"><strong>Nama Perusahaan:</strong><br><span class="badge bg-primary"> <?= $loker['nama_perusahaan']; ?> </span></li>
                                             </ul>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <div class="d-flex">
-                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 50px;">
+                                                <div class="d-flex justify-content-start align-items-center">
+                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 40px; max-height: 40px;">
                                                     <div class="mt-1 ms-2 d-flex flex-column">
                                                         <span class="mb-1 mapsLink"><?= '<a class="linkMaps icon-link icon-link-hover"  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?></span>
                                                         <?php
@@ -429,13 +422,15 @@ include '../template/headers.php';
                                                 </div>
                                                 <div class="d-flex flex-column align-items-center">
                                                     <?php if ($isTutup) : ?>
-                                                        <a href="../../pages/public/loker.php" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
+                                                        <a href="./loker.php" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                     <?php elseif ($isBelumBuka) : ?>
-                                                        <a href="../../pages/public/loker.php" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
-                                                    <?php elseif ($_SESSION['level'] == 'alumni') : ?>
+                                                        <a href="./loker.php" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
+                                                    <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') : ?>
                                                         <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
-                                                    <?php else : ?>
+                                                    <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
                                                         <a href="../../logout.php" class="btn btn-sm btn-outline-primary">Khusus Alumni</a>
+                                                    <?php else : ?>
+                                                        <a href="" data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-sm px-4 btn-outline-primary text-center"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</a>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
@@ -471,11 +466,13 @@ include '../template/headers.php';
     </div>
     <!--end::App Wrapper-->
 
+    <?php include '../../src/template/modalForm.php'; ?>
+
     <?php foreach ($daftarLoker as $loker) : ?>
         <!--begin::Modal Syarat -->
         <div class="modal fade" id="modalSyarat<?= $loker['id_lowongan']; ?>" tabindex="-1">
             <div class="modal-dialog">
-                <form action="proses-lamaran.php" method="POST" enctype="multipart/form-data">
+                <form action="../../src/config/proses-lamaran.php" method="POST" enctype="multipart/form-data">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Lamar Lowongan</h5>
@@ -501,7 +498,7 @@ include '../template/headers.php';
 
     <!-- Script -->
     <?php
-    include '../template/footer.php';
+    include '../../src/template/footer.php';
     ?>
 
     <!-- Begin::Details -->
@@ -511,7 +508,7 @@ include '../template/headers.php';
                 // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
                 if (e.target.closest('a')) return;
                 const id = this.getAttribute('data-id');
-                window.location.href = `../../src/config/detail_loker.php?id_lowongan=${id}`;
+                window.location.href = `./detail_loker.php?id_lowongan=${id}`;
             });
         });
     </script>

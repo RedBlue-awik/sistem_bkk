@@ -296,7 +296,7 @@ include '../../src/template/headers.php'
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -389,8 +389,8 @@ include '../../src/template/headers.php'
                                                 <li class="mb-2"><strong>Deskripsi:</strong><br> <?= $loker['deskripsi']; ?></li>
                                             </ul>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <div class="d-flex">
-                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 50px;">
+                                                <div class="d-flex justify-content-start align-items-center">
+                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 40px; max-height: 40px;">
                                                     <div class="mt-1 ms-2 d-flex flex-column">
                                                         <span class="mb-1 mapsLink"><?= '<a class="linkMaps icon-link icon-link-hover"  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?></span>
                                                         <div class="d-flex flex-column">

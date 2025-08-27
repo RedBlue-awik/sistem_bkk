@@ -3,16 +3,17 @@
 session_start();
 
 // Cek apakah sudah ada session login, jika sudah kembalikan
-if (!isset($_SESSION['id_pengguna'])) {
-    echo "
-    <script>
-    document.location.href = '../../index.php';
-    </script>
-    ";
-}
+// if (!isset($_SESSION['id_pengguna'])) {
+//     echo "
+//     <script>
+//     document.location.href = '../../index.php';
+//     </script>
+//     ";
+// }
 
 require '../../src/functions.php';
-
+include '../../src/controller/LoginF.php';
+include '../../src/controller/lupapw.php';
 
 // Cek apakah tombol tambah di klik
 if (isset($_POST['tambah'])) {
@@ -296,40 +297,50 @@ include '../../src/template/headers.php'
                 <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto">
 
-                    <!--begin::User Menu Dropdown-->
-                    <li class="nav-item dropdown user-menu">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img
-                                src="../../src/assets/img/logo.png"
-                                class="user-image rounded-circle shadow"
-                                alt="User Image" />
-                            <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                            <!--begin::User Image-->
-                            <li class="user-header bg-secondary-subtle">
-                                <?php if ($_SESSION["gambar"] !== "") : ?>
-                                    <img
-                                        src="../../dist/assets/img/user2-160x160.jpg"
-                                        class="rounded-circle shadow"
-                                        alt="User Image" />
-                                <?php endif; ?>
-                                <p class="fw-semibold text-light">Nama</p>
-                                <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
-                                <p class="fw-semibold text-light">Status</p>
-                                <?php $kondisi = ($_SESSION["level"] == "admin") ? 'bg-info-subtle' : 'bg-success-subtle' ?>
-                                <span class="badge <?= $kondisi ?> p-2 fs-6 px-3 mb-1"><?= $_SESSION["level"]; ?></span>
-                            </li>
-                            <!--end::User Image-->
-                            <!--begin::Menu Footer-->
-                            <li class="user-footer">
-                                <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
-                            </li>
-                            <!--end::Menu Footer-->
+                    <?php if (isset($_SESSION['level'])) : ?>
+                        <!--begin::User Menu Dropdown-->
+                        <li class="nav-item dropdown user-menu">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <img
+                                    src="../../src/assets/img/logo.png"
+                                    class="user-image rounded-circle shadow"
+                                    alt="User Image" />
+                                <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                                <!--begin::User Image-->
+                                <li class="user-header bg-secondary-subtle">
+                                    <?php if ($_SESSION["gambar"] !== "") : ?>
+                                        <img
+                                            src="../../dist/assets/img/user2-160x160.jpg"
+                                            class="rounded-circle shadow"
+                                            alt="User Image" />
+                                    <?php endif; ?>
+                                    <p class="fw-semibold text-light">Nama</p>
+                                    <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
+                                    <p class="fw-semibold text-light">Status</p>
+                                    <?php $kondisi = ($_SESSION["level"] == "admin") ? 'bg-info-subtle' : 'bg-success-subtle' ?>
+                                    <span class="badge <?= $kondisi ?> p-2 fs-6 px-3 mb-1"><?= $_SESSION["level"]; ?></span>
+                                </li>
+                                <!--end::User Image-->
+                                <!--begin::Menu Footer-->
+                                <li class="user-footer">
+                                    <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
+                                    <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
+                                </li>
+                                <!--end::Menu Footer-->
+                            </ul>
+                        </li>
+                        <!--end::User Menu Dropdown-->
+                    <?php else: ?>
+                        <ul class="navbar-nav ms-auto">
+
+                            <!--begin::User Menu Dropdown-->
+                            <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-pen-to-square me-2"></i>Daftar</button>
+                            <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</button>
+                            <!--end::User Menu Dropdown-->
                         </ul>
-                    </li>
-                    <!--end::User Menu Dropdown-->
+                    <?php endif; ?>
                 </ul>
                 <!--end::End Navbar Links-->
             </div>
@@ -385,7 +396,7 @@ include '../../src/template/headers.php'
                         ?>
 
                         <div class="row g-3 mt-3" id="lokerCards">
-                            <?php if ($_SESSION['level'] == 'admin') : ?>
+                            <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
                                 <!-- Tombol Tambah Loker -->
                                 <div class="col-sm-6 col-xl-4 loker-card-admin">
                                     <div class="card job-card h-100 bg-secondary-subtle" data-bs-toggle="modal" data-bs-target="#modalLoker">
@@ -430,8 +441,8 @@ include '../../src/template/headers.php'
                                                 <li class="mb-2"><strong>Deskripsi:</strong><br> <?= $loker['deskripsi']; ?></li>
                                             </ul>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <div class="d-flex">
-                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 50px;">
+                                                <div class="d-flex justify-content-start align-items-center">
+                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 40px; max-height: 40px;">
                                                     <div class="mt-1 ms-2 d-flex flex-column">
                                                         <span class="mb-1 mapsLink"><?= '<a class="linkMaps icon-link icon-link-hover"  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?></span>
                                                         <div class="d-flex flex-column">
@@ -461,21 +472,22 @@ include '../../src/template/headers.php'
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <?php if ($_SESSION['level'] == 'admin') : ?>
+                                                    <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') { ?>
                                                         <span class="btn btn-group me-n3">
                                                             <a href="" class="btn btn-sm btn-outline-success mb-1 me-1" data-bs-toggle="modal" data-bs-target="#modalEdit<?= $loker['id_lowongan']; ?>" data-bs-trigger="hover" data-bs-placement="top" data-bs-custom-class="custom-tooltip-Edit" data-bs-title="Edit ( Ubah )"><i class="fas fa-gear"></i></a>
                                                             <a href="../../src/config/hapus-dataloker.php?id=<?= $loker['id_lowongan'] ?>" class="btn btn-sm btn-outline-danger btn-hapus mb-1 ms-1" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-custom-class="custom-tooltip-Delete" data-bs-title="Delete ( Hapus )"><i class="fas fa-trash"></i></a>
                                                         </span>
-                                                    <?php else : ?>
+                                                    <?php } else if (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') { ?>
                                                         <?php if ($isTutup) : ?>
                                                             <a href="" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                         <?php elseif ($isBelumBuka) : ?>
                                                             <a href="" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                         <?php else : ?>
                                                             <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
-
                                                         <?php endif; ?>
-                                                    <?php endif; ?>
+                                                    <?php } else { ?>
+                                                        <a href="" data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-sm px-4 btn-outline-primary">Login</a>
+                                                    <?php } ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -529,6 +541,8 @@ include '../../src/template/headers.php'
         <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+
+    <?php include '../../src/template/modalForm.php' ?>
 
     <?php foreach ($daftarLoker as $loker) : ?>
 
@@ -932,7 +946,7 @@ include '../../src/template/headers.php'
                 if (e.target.closest('a')) return;
 
                 const id = this.getAttribute('data-id');
-                window.open(`../../src/config/detail_loker.php?id_lowongan=${id}`);
+                window.open(`./detail_loker.php?id_lowongan=${id}`);
             });
         });
     </script>

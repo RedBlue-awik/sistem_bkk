@@ -12,16 +12,36 @@ if (!isset($_SESSION['id_pengguna'])) {
         </script>
     ";
 }
-$tahun_sekarang = date('Y');
 
-$sql = "
-    SELECT MONTHNAME(waktu_login) AS bulan, COUNT(DISTINCT id_user) AS jumlah
-    FROM log_login
-    WHERE YEAR(waktu_login) = '$tahun_sekarang'
-    GROUP BY MONTH(waktu_login)
-    ORDER BY MONTH(waktu_login)
-";
-$result = mysqli_query($conn, $sql);
+
+function getLoker()
+{
+    global $conn;
+
+    $query = "SELECT lowongan.*, perusahaan.nama_perusahaan, perusahaan.logo, perusahaan.alamat, perusahaan.bidang_usaha
+              FROM lowongan 
+              JOIN perusahaan ON lowongan.id_perusahaan = perusahaan.id_perusahaan 
+              WHERE tanggal_ditutup >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+              ORDER BY lowongan.id_lowongan DESC";
+
+    $result = mysqli_query($conn, $query);
+
+    $loker = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        // Format gaji langsung
+        $angka = str_replace(['.', ','], ['', '.'], $row['gaji']);
+        $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($angka) . '/' . $row['kpn_gaji_diberi'];
+
+        // Ubah persyaratan ke array
+        if (is_string($row['persyaratan'])) {
+            $row['persyaratan'] = explode(',', $row['persyaratan']);
+        }
+
+        $loker[] = $row;
+    }
+
+    return $loker;
+}
 
 $tahun_sekarang = date('Y');
 
@@ -76,7 +96,18 @@ $total_admins = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total
 $total_perusahaan = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM perusahaan"))['total'];
 $total_loker = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM lowongan"))['total'];
 
-
+// Query untuk mendapatkan loker paling populer (berdasarkan jumlah lamaran)
+$query_popular = mysqli_query($conn, "
+    SELECT l.*, p.nama_perusahaan, p.logo, COUNT(lam.id_lamaran) as jumlah_lamaran
+    FROM lowongan l
+    LEFT JOIN lamaran lam ON l.id_lowongan = lam.id_lowongan
+    JOIN perusahaan p ON l.id_perusahaan = p.id_perusahaan
+    WHERE l.tanggal_dibuka <= CURDATE() AND l.tanggal_ditutup >= CURDATE()
+    GROUP BY l.id_lowongan
+    HAVING jumlah_lamaran > 0
+    ORDER BY jumlah_lamaran DESC, l.tanggal_dibuka DESC
+    LIMIT 6
+");
 // Panggil lamaran
 $query = mysqli_query($conn, "
     SELECT p.nama_perusahaan, COUNT(*) AS total
@@ -107,14 +138,21 @@ include '../../src/template/headers.php';
         font-family: "Poppins", sans-serif;
     }
 
+    .dashboard-row {
+        min-height: 240px;
+    }
+
+    .dashboard-card {
+        min-height: 240px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
     .logo-card {
         transition: transform 0.25s ease, box-shadow 0.25s ease;
         border-radius: 1rem;
-    }
-
-    .logo-card:hover {
-        transform: translateY(-5px) scale(1.03);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     .logo-wrapper {
@@ -147,10 +185,94 @@ include '../../src/template/headers.php';
             width: 200px;
         }
     }
+
+    @media (max-width: 991.98px) {
+
+        .dashboard-row,
+        .dashboard-card {
+            min-height: 180px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+
+        .dashboard-row,
+        .dashboard-card {
+            min-height: 140px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+
+        .dashboard-row,
+        .dashboard-card {
+            min-height: 100px;
+        }
+
+        .dashboard-card img {
+            max-width: 250px !important;
+            max-height: 250px !important;
+        }
+    }
+
+
+    .loker-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 0.75rem;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .loker-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .loker-img {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f8f9fa;
+        padding: 5px;
+    }
+
+    .loker-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .loker-company {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .loker-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .loker-badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .loker-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
 </style>
 </head>
 <!--end::Head-->
 <!--begin::Body-->
+
+
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <!--begin::App Wrapper-->
@@ -198,7 +320,7 @@ include '../../src/template/headers.php';
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -214,7 +336,178 @@ include '../../src/template/headers.php';
         <?php include('../../src/template/menu.php'); ?>
         <!--end::Sidebar-->
         <!--begin::App Main-->
+        <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'alumni') :?>
         <main class="app-main">
+            <!--begin::App Content-->
+            <div class="container-fluid">
+                <div class="text-center">
+                    <h1 class="fw-bold text-muted mt-4">APLIKASI BURSA KERJA KHUSUS</h1>
+                </div>
+                <div class="row g-3 mt-4 align-items-stretch dashboard-row">
+                    <div class="col-12 col-md-6 col-lg-6 d-flex">
+                        <div class="card shadow-sm border-0 text-center d-flex justify-content-center align-items-center flex-fill dashboard-card rounded-4 py-4">
+                            <div class="w-100 d-flex flex-column align-items-center justify-content-center">
+                                <img src="../../src/assets/img/logoBKK.png" alt="Logo BKK" class="img-fluid mb-3" style="width: 310px; max-width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                                <div class="fw-bold text-muted fs-5">SMK MAMBA'UL IHSAN</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6 d-flex">
+                        <div class="card shadow-sm border-0 text-center p-4 flex-fill dashboard-card rounded-4 h-100">
+                            <div class="row h-100">
+                                <div class="col-6 d-flex align-items-center justify-content-center">
+                                    <div class="bg-primary-subtle rounded-3 p-3 w-100 mx-1">
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                            <i class="fas fa-users text-white"></i>
+                                        </div>
+                                        <div class="fw-bold fs-5"><?= $total_users; ?></div>
+                                        <div class="text-secondary">Users</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 d-flex align-items-center justify-content-center">
+                                    <div class="bg-success-subtle rounded-3 p-3 w-100 mx-1">
+                                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                            <i class="fas fa-user-shield text-white"></i>
+                                        </div>
+                                        <div class="fw-bold fs-5"><?= $total_admins; ?></div>
+                                        <div class="text-secondary">Admin</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 d-flex align-items-center justify-content-center mt-3">
+                                    <div class="bg-info-subtle rounded-3 p-3 w-100 mx-1">
+                                        <div class="bg-info rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                            <i class="fas fa-building text-white"></i>
+                                        </div>
+                                        <div class="fw-bold fs-5"><?= $total_perusahaan; ?></div>
+                                        <div class="text-secondary">Perusahaan</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 d-flex align-items-center justify-content-center mt-3">
+                                    <div class="bg-warning-subtle rounded-3 p-3 w-100 mx-1">
+                                        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                            <i class="fas fa-briefcase text-white"></i>
+                                        </div>
+                                        <div class="fw-bold fs-5"><?= $total_loker; ?></div>
+                                        <div class="text-secondary">Loker</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-4">
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card shadow-sm border-0 text-center logo-card h-100">
+                            <div class="card-body">
+                                <div class="logo-wrapper big">
+                                    <img src="../../src/assets/img/logo/vokasi-l.png" alt="Vokasi">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card shadow-sm border-0 text-center logo-card h-100">
+                            <div class="card-body">
+                                <div class="logo-wrapper big">
+                                    <img src="../../src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card shadow-sm border-0 text-center logo-card">
+                            <div class="card-body">
+                                <div class="logo-wrapper">
+                                    <img src="../../src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card shadow-sm border-0 text-center logo-card">
+                            <div class="card-body">
+                                <div class="logo-wrapper">
+                                    <img src="../../src/assets/img/logo/dudi.png" alt="DUDI">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Loker Paling Populer Section -->
+                <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
+                    <span>Loker Paling Populer</span>
+                </div>
+                <div class="container mt-4">
+                    <div class="row g-4">
+                        <?php if (mysqli_num_rows($query_popular) > 0): ?>
+                            <?php while ($loker = mysqli_fetch_assoc($query_popular)): ?>
+                                <div class="col-md-6 col-lg-4">
+                                    <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click loker-card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo'] ?? 'default.png' ?>"
+                                                    alt="<?= $loker['nama_perusahaan'] ?>"
+                                                    class="loker-img rounded me-3">
+                                                <div>
+                                                    <h6 class="loker-title mb-0"><?= $loker['judul'] ?></h6>
+                                                    <div class="loker-company"><?= $loker['nama_perusahaan'] ?></div>
+                                                </div>
+                                            </div>
+                                            <p class="loker-desc"><?= $loker['deskripsi'] ?></p>
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <span class="badge bg-primary loker-badge"><?= $loker['jumlah_lamaran'] ?> Pelamaran</span>
+                                                <small class="loker-date"><?= date('d M Y', strtotime($loker['tanggal_dibuka'])) ?></small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>"
+                                                class="btn btn-sm btn-outline-primary w-100">Lamar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <div class="col-md-6 col-lg-4">
+                            <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <div class="d-flex flex-column align-items-center mb-3">
+                                        <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
+                                        <h5 class="">Loker Lainnya <i class="fa-solid fa-arrow-right ms-1"></i></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Online Card -->
+                <div class="card card-round mt-4">
+                    <div class="card-body">
+                        <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
+                        <h2 class="mb-2"><?= $total_online ?></h2>
+                        <p class="text-muted">Users online</p>
+                        <div id="chart-container">
+                            <canvas id="loginChart" style="height:260px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end::Row-->
+            <!--end::App Content-->
+        </main>
+
+        <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] == 'admin') :?>
+         <main class="app-main">
             <!--begin::App Content Header-->
             <div class="app-content-header">
                 <!--begin::Container-->
@@ -370,6 +663,8 @@ include '../../src/template/headers.php';
                 <!--end::App Content-->
             </div>
         </main>
+
+        <?php endif; ?>
         <!--end::App Main-->
         <!--begin::Footer-->
         <footer class="app-footer">
@@ -390,6 +685,40 @@ include '../../src/template/headers.php';
         <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+    <!-- Modal -->
+    <?php
+    $daftarLoker = getLoker();
+    ?>
+
+    <?php foreach ($daftarLoker as $loker) : ?>
+
+        <!--begin::Modal Syarat -->
+        <div class="modal fade" id="modalSyarat<?= $loker['id_lowongan']; ?>" tabindex="-1">
+            <div class="modal-dialog">
+                <form action="../../src/config/proses-lamaran.php?id=<?= $loker['id_lowongan'] ?>" method="POST" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Lamar Lowongan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id_lowongan" value="<?= $loker['id_lowongan']; ?>">
+                            <input type="hidden" name="id_alumni" value="<?= $_SESSION['id_pengguna'] ?>">
+                            <div class="mb-3">
+                                <label for="cv">Upload CV</label>
+                                <input type="file" name="cv" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" name="kirim" class="btn btn-primary">Kirim Lamaran</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- End::Modal Syarat -->
+
+    <?php endforeach; ?>
     <!--begin::Script-->
 
     <?php
@@ -397,7 +726,6 @@ include '../../src/template/headers.php';
     ?>
 
     <script>
-
         // Chart Login Alumni
         const loginData = {
             labels: <?= json_encode($bulan_labels); ?>,
@@ -494,6 +822,29 @@ include '../../src/template/headers.php';
         }
     </script>
 
+    <!-- Begin::Details -->
+    <script>
+        document.querySelectorAll('.card-click').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
+                if (e.target.closest('a')) return;
+
+                const id = this.getAttribute('data-id');
+                window.open(`./detail_loker.php?id_lowongan=${id}`);
+            });
+        });
+    </script>
+    <!-- End::Details -->
+
+    <script>
+        document.querySelectorAll('.card-click-all').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
+                if (e.target.closest('a')) return;
+                window.location.href = `./loker.php`;
+            });
+        });
+    </script>
 
     <!--end::Script-->
 </body>

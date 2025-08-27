@@ -15,7 +15,45 @@
     <!--end::Sidebar Brand-->
     <!--begin::Sidebar Wrapper-->
     <div class="sidebar-wrapper">
-        <?php if ($_SESSION["level"] == "admin") { ?>
+        <?php if (!isset($_SESSION['level'])) { ?>
+            <nav class="mt-2">
+                <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+                    <li class="nav-item">
+                        <a href="../../index.php" class="nav-link "><i class="bi bi-speedometer"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./chart.php" class="nav-link"><i class="fa-solid fa-chart-line"></i>
+                            <p>Statistic</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./loker.php" class="nav-link"><i class="bi bi-briefcase-fill"></i>
+                            <p>Lowongan Kerja</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="./pengumuman-all.php" class="nav-link mt-2 d-flex align-items-center">
+                            <i class="bi bi-bell-fill"></i>
+                            <p class="p-b">Pengumuman <span class="badgePengumuman badge bg-danger float-end d-none">0</span></p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="nav-link mt-3 d-flex align-items-center" style="cursor: pointer;">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <p>Daftar</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="modal" data-bs-target="#Modallogin" class="nav-link  mt-2 d-flex align-items-center" style="cursor: pointer;">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <p>Login</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <?php } else if ($_SESSION["level"] == "admin") { ?>
             <nav class="mt-2">
                 <!--begin::Sidebar Menu-->
                 <ul
@@ -118,7 +156,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="../../logout.php" class="nav-link mt-3 btn-logout">
-                            <i class="bi bi-box-arrow-right"></i>
+                            <i class="fas fa-arrow-right-from-bracket"></i>
                             <p>
                                 Logout
                             </p>
@@ -172,7 +210,7 @@
                             <li class="nav-item">
                                 <a href="../../pages/public/loker.php" class="nav-link">
                                     <i class="nav-icon bi bi-briefcase-fill"></i>
-                                    <p>Manejemen Loker</p>
+                                    <p>Lowongan Kerja</p>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -210,8 +248,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="../../logout.php" class="nav-link mt-3 btn-logout">
-                            <i class="bi bi-box-arrow-right"></i>
+                        <a href="../../logout.php" class="nav-link d-flex align-items-center mt-3 btn-logout">
+                            <i class="fas fa-arrow-right-from-bracket"></i>
                             <p>
                                 Logout
                             </p>

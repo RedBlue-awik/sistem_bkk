@@ -91,6 +91,15 @@ $dataLamaran = [];
 while ($row = mysqli_fetch_assoc($query)) {
     $dataLamaran[] = $row;
 }
+
+// Ambil semua status unik untuk dropdown filter
+$statusList = [];
+foreach ($dataLamaran as $row) {
+    if (!in_array($row['status'], $statusList)) {
+        $statusList[] = $row['status'];
+    }
+}
+sort($statusList);
 ?>
 
 <!doctype html>
@@ -169,7 +178,7 @@ include '../../src/template/headers.php';
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
@@ -215,7 +224,24 @@ include '../../src/template/headers.php';
                                         <i class="fa-solid fa-id-card-clip me-1"></i>
                                         Data Lamaran
                                     </div>
-                                    <i class="fa-solid fa-envelope-open-text float-end mt-2 fs-4"></i>
+                                    <!-- Tombol Filter hanya untuk admin -->
+                                    <?php if ($level == 'admin') : ?>
+                                        <div class="float-end">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="filterStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-filter me-1"></i> Filter Status
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="filterStatusDropdown">
+                                                    <li><a class="dropdown-item filter-option" href="#" data-status="all">Semua Status</a></li>
+                                                    <?php foreach ($statusList as $status) : ?>
+                                                        <li><a class="dropdown-item filter-option" href="#" data-status="<?= htmlspecialchars($status) ?>"><?= htmlspecialchars($status) ?></a></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    <?php else : ?>
+                                    <i class="fa-solid fa-envelope-open-text float-end mt-2 fs-4 me-2"></i>
+                                    <?php endif ; ?>
                                 </div>
                                 <div class="card-body">
                                     <!-- Tabel Data Siswa -->
@@ -239,7 +265,7 @@ include '../../src/template/headers.php';
                                                 $no = 1;
                                                 foreach ($dataLamaran as $row) :
                                                 ?>
-                                                    <tr>
+                                                    <tr class="lamaran-row" data-status="<?= htmlspecialchars($row['status']) ?>">
                                                         <td class="text-center fw-bold"><?= $no++; ?></td>
                                                         <td><?= $row['status']; ?></td>
                                                         <td><?= $row['nama_siswa']; ?></td>
@@ -494,8 +520,47 @@ include '../../src/template/headers.php';
         });
     </script>
 
-    <script>
 
+    <!-- JavaScript Filter -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi untuk filter status
+            const filterOptions = document.querySelectorAll('.filter-option');
+            const lamaranRows = document.querySelectorAll('.lamaran-row');
+
+            filterOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const selectedStatus = this.getAttribute('data-status');
+
+                    // Update teks dropdown
+                    document.getElementById('filterStatusDropdown').innerHTML =
+                        `<i class="fas fa-filter me-1"></i>` + (selectedStatus === 'all' ? 'Semua Status' : selectedStatus);
+
+                    // Filter baris tabel
+                    lamaranRows.forEach(row => {
+                        if (selectedStatus === 'all') {
+                            row.style.display = '';
+                        } else {
+                            const rowStatus = row.getAttribute('data-status');
+                            row.style.display = rowStatus === selectedStatus ? '' : 'none';
+                        }
+                    });
+
+                    // Perbarui nomor urut
+                    updateRowNumbers();
+                });
+            });
+
+            // Fungsi untuk memperbarui nomor urut
+            function updateRowNumbers() {
+                let visibleRows = document.querySelectorAll('.lamaran-row:not([style*="display: none"])');
+                visibleRows.forEach((row, index) => {
+                    row.querySelector('td:first-child').textContent = index + 1;
+                });
+            }
+        });
     </script>
 
     <!-- End::Script -->

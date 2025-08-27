@@ -2,16 +2,9 @@
 // Syarat untuk menggunakan session
 session_start();
 
-// Cek apakah sudah ada session login, jika sudah kembalikan
-if (!isset($_SESSION['id_pengguna'])) {
-  echo "
-        <script>
-            document.location.href = '../../index.php';
-        </script>
-    ";
-}
-
 require '../../src/functions.php';
+include '../../src/controller/LoginF.php';
+include '../../src/controller/lupapw.php';
 
 // Ambil data dari database
 $query = mysqli_query($conn, "
@@ -106,40 +99,50 @@ include '../../src/template/headers.php';
         <!--begin::End Navbar Links-->
         <ul class="navbar-nav ms-auto">
 
-          <!--begin::User Menu Dropdown-->
-          <li class="nav-item dropdown user-menu">
-            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-              <img
-                src="../../src/assets/img/logo.png"
-                class="user-image rounded-circle shadow"
-                alt="User Image" />
-              <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-              <!--begin::User Image-->
-              <li class="user-header bg-secondary-subtle">
-                <?php if ($_SESSION["gambar"] !== "") : ?>
-                  <img
-                    src="../../dist/assets/img/user2-160x160.jpg"
-                    class="rounded-circle shadow"
-                    alt="User Image" />
-                <?php endif; ?>
-                <p class="fw-semibold text-light">Nama</p>
-                <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
-                <p class="fw-semibold text-light">Status</p>
-                <?php $kondisi = ($_SESSION["level"] == "admin") ? 'bg-info-subtle' : 'bg-success-subtle' ?>
-                <span class="badge <?= $kondisi ?> p-2 fs-6 px-3 mb-1"><?= $_SESSION["level"]; ?></span>
-              </li>
-              <!--end::User Image-->
-              <!--begin::Menu Footer-->
-              <li class="user-footer">
-                <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
-              </li>
-              <!--end::Menu Footer-->
+          <?php if (isset($_SESSION['level'])) : ?>
+            <!--begin::User Menu Dropdown-->
+            <li class="nav-item dropdown user-menu">
+              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                <img
+                  src="../../src/assets/img/logo.png"
+                  class="user-image rounded-circle shadow"
+                  alt="User Image" />
+                <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <!--begin::User Image-->
+                <li class="user-header bg-secondary-subtle">
+                  <?php if ($_SESSION["gambar"] !== "") : ?>
+                    <img
+                      src="../../dist/assets/img/user2-160x160.jpg"
+                      class="rounded-circle shadow"
+                      alt="User Image" />
+                  <?php endif; ?>
+                  <p class="fw-semibold text-light">Nama</p>
+                  <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
+                  <p class="fw-semibold text-light">Status</p>
+                  <?php $kondisi = ($_SESSION["level"] == "admin") ? 'bg-info-subtle' : 'bg-success-subtle' ?>
+                  <span class="badge <?= $kondisi ?> p-2 fs-6 px-3 mb-1"><?= $_SESSION["level"]; ?></span>
+                </li>
+                <!--end::User Image-->
+                <!--begin::Menu Footer-->
+                <li class="user-footer">
+                  <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
+                  <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
+                </li>
+                <!--end::Menu Footer-->
+              </ul>
+            </li>
+            <!--end::User Menu Dropdown-->
+          <?php else: ?>
+            <ul class="navbar-nav ms-auto">
+
+              <!--begin::User Menu Dropdown-->
+              <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-pen-to-square me-2"></i>Daftar</button>
+              <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</button>
+              <!--end::User Menu Dropdown-->
             </ul>
-          </li>
-          <!--end::User Menu Dropdown-->
+          <?php endif; ?>
         </ul>
         <!--end::End Navbar Links-->
       </div>
@@ -213,6 +216,8 @@ include '../../src/template/headers.php';
   </div>
   <!--end::App Wrapper-->
   <!--begin::Script-->
+
+  <?php include '../../src/template/modalForm.php'; ?>
 
   <?php
   include '../../src/template/footer.php';

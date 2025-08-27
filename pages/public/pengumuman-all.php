@@ -1,16 +1,20 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Jakarta');
-if (!isset($_SESSION['id_pengguna'])) {
-    echo "<script>document.location.href = '../../index.php';</script>";
-    exit;
-}
+// if (!isset($_SESSION['id_pengguna'])) {
+//     echo "<script>document.location.href = '../../index.php';</script>";
+//     exit;
+// }
 
 require '../../src/functions.php';
 
-// Ambil id_alumni (bukan id_user) jika alumni
+include '../../src/controller/LoginF.php';
+
+include '../../src/controller/lupapw.php';
+
+// Ambil id_alumni
 $id_siswa = 0;
-if ($_SESSION['level'] == 'alumni') {
+if (isset($_SESSION['level']) && $_SESSION['level'] == 'alumni') {
     $id_user = intval($_SESSION['id_pengguna']);
     $q = mysqli_query($conn, "SELECT kode_pengguna FROM user WHERE id_user = $id_user");
     $row = mysqli_fetch_assoc($q);
@@ -23,6 +27,7 @@ if ($_SESSION['level'] == 'alumni') {
         }
     }
 }
+
 
 $cek = cekPengumumanLokerBerakhir();
 
@@ -171,6 +176,7 @@ foreach ($pengumuman as $p) {
                 <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto">
 
+                <?php if (isset ($_SESSION['level'])) : ?>
                     <!--begin::User Menu Dropdown-->
                     <li class="nav-item dropdown user-menu">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -199,12 +205,21 @@ foreach ($pengumuman as $p) {
                             <!--begin::Menu Footer-->
                             <li class="user-footer">
                                 <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="bi bi-box-arrow-right"></i></a>
+                                <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
                             </li>
                             <!--end::Menu Footer-->
                         </ul>
                     </li>
                     <!--end::User Menu Dropdown-->
+                <?php else: ?>
+                    <ul class="navbar-nav ms-auto">
+
+                        <!--begin::User Menu Dropdown-->
+                        <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-pen-to-square me-2"></i>Daftar</button>
+                        <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</button>
+                        <!--end::User Menu Dropdown-->
+                    </ul>
+                <?php endif; ?>
                 </ul>
                 <!--end::End Navbar Links-->
             </div>
@@ -309,6 +324,11 @@ foreach ($pengumuman as $p) {
         <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+
+    <!-- beggin::Modal -->
+        <?php include '../../src/template/modalForm.php'; ?>
+    <!-- end::Modal -->
+
     <?php include '../../src/template/footer.php'; ?>
 
     <script>
