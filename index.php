@@ -183,7 +183,7 @@ $query_popular = mysqli_query($conn, "
     GROUP BY l.id_lowongan
     HAVING jumlah_lamaran > 0
     ORDER BY jumlah_lamaran DESC, l.tanggal_dibuka DESC
-    LIMIT 6
+    LIMIT 8
 ");
 // Panggil lamaran
 $query = mysqli_query($conn, "
@@ -295,8 +295,8 @@ while ($row = mysqli_fetch_assoc($query)) {
         }
 
         .logo-wrapper.big img {
-            max-width: 150px;
-            max-height: 150px;
+            max-width: 145px;
+            max-height: 145px;
         }
 
         .logo1 {
@@ -309,6 +309,11 @@ while ($row = mysqli_fetch_assoc($query)) {
                 width: 200px;
                 width: 200px;
             }
+
+            .logo-wrapper.big img {
+                max-width: 135px !important;
+                max-height: 135px !important;
+            }
         }
 
         @media (max-width: 991.98px) {
@@ -316,6 +321,11 @@ while ($row = mysqli_fetch_assoc($query)) {
             .dashboard-row,
             .dashboard-card {
                 min-height: 180px;
+            }
+
+            .logo-wrapper.big img {
+                max-width: 120px !important;
+                max-height: 120px !important;
             }
         }
 
@@ -325,6 +335,18 @@ while ($row = mysqli_fetch_assoc($query)) {
             .dashboard-card {
                 min-height: 140px;
             }
+
+            .logo-wrapper.big img {
+                max-width: 120px !important;
+                max-height: 120px !important;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .logo-wrapper.big img {
+                max-width: 110px !important;
+                max-height: 110px !important;
+            }
         }
 
         @media (max-width: 575.98px) {
@@ -332,6 +354,11 @@ while ($row = mysqli_fetch_assoc($query)) {
             .dashboard-row,
             .dashboard-card {
                 min-height: 100px;
+            }
+
+            .logo-wrapper.big img {
+                max-width: 125px !important;
+                max-height: 125px !important;
             }
 
             .dashboard-card img {
@@ -530,10 +557,67 @@ while ($row = mysqli_fetch_assoc($query)) {
                             </div>
                         </div>
                     </div>
+                    <!-- Loker Paling Populer Section -->
+                    <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
+                        <span>Loker Paling Populer</span>
+                    </div>
+                    <div class="container mt-4">
+                        <div class="row g-4">
+                            <?php if (mysqli_num_rows($query_popular) > 0): ?>
+                                <?php while ($loker = mysqli_fetch_assoc($query_popular)): ?>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click loker-card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <img src="./src/assets/img/perusahaan/logo/<?= $loker['logo'] ?? 'default.png' ?>"
+                                                        alt="<?= $loker['nama_perusahaan'] ?>"
+                                                        class="loker-img rounded me-3">
+                                                    <div>
+                                                        <h6 class="loker-title mb-0"><?= $loker['judul'] ?></h6>
+                                                        <div class="loker-company"><?= $loker['nama_perusahaan'] ?></div>
+                                                    </div>
+                                                </div>
+                                                <p class="loker-desc"><?= $loker['deskripsi'] ?></p>
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <span class="badge bg-primary loker-badge"><?= $loker['jumlah_lamaran'] ?> Pelamaran</span>
+                                                    <small class="loker-date"><?= date('d M Y', strtotime($loker['tanggal_dibuka'])) ?></small>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer bg-transparent">
+                                                <a data-bs-target="#Modallogin" data-bs-toggle="modal"
+                                                    class="btn btn-sm btn-outline-primary w-100">Lamar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <div class="col-12">
+                                    <div class="alert alert-info text-center">
+                                        <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <div class="col-md-6 col-lg-4">
+                                <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
+                                    <div class="card-body d-flex flex-column justify-content-center">
+                                        <div class="d-flex flex-column align-items-center mb-3">
+                                            <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
+                                            <h5 class="">Loker Lainnya <i class="fa-solid fa-arrow-right ms-1"></i></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="row g-3 mt-4">
 
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="fw-semibold text-center fs-4 p-3 bg-success-subtle bg-opacity-10 border border-success border-start-0 border-end-0 mt-4">
+                        <span>Mitra SMK</span>
+                    </div>
+
+                    <div class="col-6 col-sm-3 col-lg-3">
                         <div class="card shadow-sm border-0 text-center logo-card h-100">
                             <div class="card-body">
                                 <div class="logo-wrapper big">
@@ -543,7 +627,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-6 col-sm-3 col-lg-3">
                         <div class="card shadow-sm border-0 text-center logo-card h-100">
                             <div class="card-body">
                                 <div class="logo-wrapper big">
@@ -553,7 +637,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-6 col-sm-3 col-lg-3">
                         <div class="card shadow-sm border-0 text-center logo-card">
                             <div class="card-body">
                                 <div class="logo-wrapper">
@@ -563,63 +647,11 @@ while ($row = mysqli_fetch_assoc($query)) {
                         </div>
                     </div>
 
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-6 col-sm-3 col-lg-3">
                         <div class="card shadow-sm border-0 text-center logo-card">
                             <div class="card-body">
                                 <div class="logo-wrapper">
                                     <img src="./src/assets/img/logo/dudi.png" alt="DUDI">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Loker Paling Populer Section -->
-                <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
-                    <span>Loker Paling Populer</span>
-                </div>
-                <div class="container mt-4">
-                    <div class="row g-4">
-                        <?php if (mysqli_num_rows($query_popular) > 0): ?>
-                            <?php while ($loker = mysqli_fetch_assoc($query_popular)): ?>
-                                <div class="col-md-6 col-lg-4">
-                                    <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click loker-card h-100 shadow-sm">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="./src/assets/img/perusahaan/logo/<?= $loker['logo'] ?? 'default.png' ?>"
-                                                    alt="<?= $loker['nama_perusahaan'] ?>"
-                                                    class="loker-img rounded me-3">
-                                                <div>
-                                                    <h6 class="loker-title mb-0"><?= $loker['judul'] ?></h6>
-                                                    <div class="loker-company"><?= $loker['nama_perusahaan'] ?></div>
-                                                </div>
-                                            </div>
-                                            <p class="loker-desc"><?= $loker['deskripsi'] ?></p>
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <span class="badge bg-primary loker-badge"><?= $loker['jumlah_lamaran'] ?> Pelamaran</span>
-                                                <small class="loker-date"><?= date('d M Y', strtotime($loker['tanggal_dibuka'])) ?></small>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer bg-transparent">
-                                            <a data-bs-target="#Modallogin" data-bs-toggle="modal"
-                                                class="btn btn-sm btn-outline-primary w-100">Lamar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <div class="col-12">
-                                <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        <div class="col-md-6 col-lg-4">
-                            <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
-                                <div class="card-body d-flex flex-column justify-content-center">
-                                    <div class="d-flex flex-column align-items-center mb-3">
-                                        <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
-                                        <h5 class="">Loker Lainnya <i class="fa-solid fa-arrow-right ms-1"></i></h5>
-                                    </div>
                                 </div>
                             </div>
                         </div>

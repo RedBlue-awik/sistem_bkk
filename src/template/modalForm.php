@@ -1,3 +1,5 @@
+<!-- Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     :root {
         --primary-color: #3f87a6;
@@ -54,6 +56,13 @@
     .input-group-text-custom {
         background: transparent;
         border-left: none;
+        border-radius: 0 8px 8px 0;
+        color: #6c757d;
+        transition: all 0.3s;
+    }
+
+    .input-group-text-custom2 {
+        background: transparent;
         border-radius: 0 8px 8px 0;
         color: #6c757d;
         transition: all 0.3s;
@@ -228,7 +237,7 @@
                             <input id="lupaUsername" type="text" name="username" class="form-control form-control-custom" placeholder="Username" required />
                             <label for="lupaUsername"><i class="fas fa-user me-2"></i>Username</label>
                         </div>
-                        
+
                         <div class="form-floating">
                             <input id="nisn" type="text" name="nisn" class="form-control" placeholder="" required autocomplete="off" />
                             <label for="nisn" class="form-label"><i class="fas fa-rectangle-list me-1"></i> Nisn</label>
@@ -313,13 +322,14 @@
 
                                     <!-- Nama -->
                                     <div class="input-group input-group-custom">
-                                        <div class="form-floating">
+                                        <div class="form-floating me-2">
                                             <input id="nama" type="text" name="nama" class="form-control form-control-custom" placeholder="Nama" required />
                                             <label for="nama"><i class="fas fa-user me-2"></i>Nama Lengkap</label>
                                         </div>
-                                        <span class="input-group-text input-group-text-custom">
-                                            <i class="fas fa-user"></i>
-                                        </span>
+                                        <div class="form-floating">
+                                            <input id="nisn" type="text" name="nisn" class="form-control" placeholder="" required autocomplete="off" />
+                                            <label for="nisn" class="form-label"><i class="fas fa-rectangle-list me-1"></i> Nisn</label>
+                                        </div>
                                     </div>
 
                                     <!-- Password -->
@@ -331,6 +341,26 @@
                                         <span class="input-group-text input-group-text-custom password-toggle" id="togglePasswordDaftar">
                                             <i class="fas fa-eye"></i>
                                         </span>
+                                    </div>
+
+                                    <div class="input-group input-group-custom">
+                                        <span class="input-group-text input-group-text-custom2">
+                                            <i class="fas fa-tags"></i>
+                                        </span>
+                                        <div class="form-floating me-2">
+                                            <select class="form-select form-select p-2" aria-label="Default select example" name="jurusan" id="jurusan" required>
+                                                <option value="" selected disabled hidden>Pilih Jurusan</option>
+                                                <option value="rpl">RPL</option>
+                                                <option value="kuliner">KULINER</option>
+                                                <option value="atph">ATPH</option>
+                                                <option value="busana">BUSANA</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-floating flex-grow-1">
+                                            <input type="date" class="form-control form-control-custom flatpickr" id="tahun_lulus" name="tahun_lulus" placeholder="" required autocomplete="off" data-date-format="Y-m-d">
+                                            <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
+                                        </div>
+                                        <div class="input-group-text input-group-text-custom2"><label for="tahun_lulus" class="fas fa-clock fa-lg"></label></div>
                                     </div>
                                 </form>
                             </div>
@@ -390,22 +420,6 @@
         }
     });
 
-    // Toggle password visibility untuk modal daftar
-    document.getElementById('togglePasswordDaftar').addEventListener('click', function() {
-        const passwordInput = document.getElementById('passwordnew');
-        const icon = this.querySelector('i');
-
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
-
     // Form validation untuk semua form dengan class needs-validation
     const forms = document.querySelectorAll('.needs-validation');
     forms.forEach(form => {
@@ -440,12 +454,17 @@
 
         // Ambil data dari form
         let nama = document.getElementById("nama").value;
+        let jurusan = document.getElementById("jurusan").value;
+        let tahun_lulus = document.getElementById("tahun_lulus").value;
         let pw = document.getElementById("daftarpassword").value;
 
         // Buat pesan WhatsApp
         let pesan = `Halo admin BKK, Saya mau daftar di website BKK sebagai alumni
-Nama: ${nama}
-Password: ${pw}
+Nama saya ${nama}
+Jurusan saya ${jurusan.toUpperCase()}
+Tahun Lulus saya pada ${tahun_lulus}
+Dan Password yang saya inginkan : ${pw}
+Mohon Bantuannya ya,
 Terima kasih!`;
 
         // Buka WhatsApp
@@ -519,4 +538,25 @@ Terima kasih!`;
     //         modal.hide();
     //     }, 200);
     // });
+</script>
+<!-- Nis Yang cuma bisa angka -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validasi NISN hanya angka (tambah & edit)
+        document.querySelectorAll('input[name="nisn"]').forEach(function(el) {
+            el.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    });
+</script>
+<!-- Date -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d",
+            allowInput: true
+        });
+    });
 </script>

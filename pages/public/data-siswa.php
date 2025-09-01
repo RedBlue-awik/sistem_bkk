@@ -249,7 +249,7 @@ include '../../src/template/headers.php';
                     <!--begin::Row-->
                     <div class="row">
                         <div class="col-sm-12 text-center">
-                            <h3 class="mb-0 fw-bold font-monospace fs-1">Data Alumni</h3>
+                            <h3 class="mb-0 fw-bold font-monospace fs-1">Data Siswa</h3>
                         </div>
                     </div>
                     <!--end::Row-->
@@ -286,7 +286,7 @@ include '../../src/template/headers.php';
                                 <div class="card-header">
                                     <div class="card-title mt-1">
                                         <i class="fa-solid fa-id-card-clip me-1"></i>
-                                        Data Alumni
+                                        Data Siswa
                                     </div>
                                     <?php if ($level === 'admin') : ?>
                                         <!-- Tombol Tambah Data -->
@@ -316,11 +316,12 @@ include '../../src/template/headers.php';
                                             </thead>
                                             <tbody class="table-group-divider text-nowrap">
                                                 <?php
+                                                $id_user = $_SESSION['id_pengguna'];
                                                 $no = 1;
                                                 foreach ($studen as $siswa) : ?>
                                                     <tr>
                                                         <td class="text-center fw-bold"><?= $no++; ?></td>
-                                                        <td><?= $siswa['nisn']; ?></td>
+                                                        <td><?php if (isset($siswa['id_user']) && $siswa['id_user'] == $id_user || $level === 'admin') : ?><?= $siswa['nisn']; ?> <?php else : ?> Bukan Pemilik <?php endif; ?></td>
                                                         <td><?= $siswa['nama']; ?></td>
                                                         <td><?= strtoupper($siswa['jurusan']); ?></td>
                                                         <td><?= $siswa['alamat']; ?></td>
@@ -413,7 +414,7 @@ include '../../src/template/headers.php';
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalTambahLabel">Tambah Data Alumni</h1>
+                    <h1 class="modal-title fs-5" id="modalTambahLabel">Tambah Data Siswa</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="" method="post" class="needs-validation" novalidate>
@@ -466,7 +467,7 @@ include '../../src/template/headers.php';
                                     <input type="date" class="form-control flatpickr" id="tahun_lulus" name="tahun_lulus" placeholder="" required autocomplete="off" data-date-format="Y-m-d">
                                     <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
                                 </div>
-                                <div class="input-group-text"><label for="tahun_lulus" class="fas fa-clock fa-shake fa-lg"></label></div>
+                                <div class="input-group-text"><label for="tahun_lulus" class="fas fa-clock fa-lg"></label></div>
                             </div>
                             <div class="input-group my-3">
                                 <div class="input-group-text"><span class="fas fa-map-location-dot"></span></div>
@@ -545,7 +546,7 @@ include '../../src/template/headers.php';
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="modalEditLabel">Edit Data Alumni</h1>
+                        <h1 class="modal-title fs-5" id="modalEditLabel">Edit Data Siswa</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form action="" method="post" class="needs-validation" novalidate>
@@ -607,7 +608,7 @@ include '../../src/template/headers.php';
                                         <input type="date" class="form-control flatpickr" id="tahun_lulus<?= $siswa["id_alumni"]; ?>" name="tahun_lulus" placeholder="" required autocomplete="off" data-date-format="Y-m-d" value="<?= $siswa["tahun_lulus"]; ?>">
                                         <label for="tahun_lulus<?= $siswa["id_alumni"]; ?>" class="form-label">Tahun Lulus</label>
                                     </div>
-                                    <div class="input-group-text"><label for="tahun_lulus<?= $siswa["id_alumni"]; ?>" class="fas fa-clock fa-shake fa-lg"></label></div>
+                                    <div class="input-group-text"><label for="tahun_lulus<?= $siswa["id_alumni"]; ?>" class="fas fa-clock fa-lg"></label></div>
                                 </div>
                                 <div class="input-group my-3">
                                     <div class="input-group-text"><span class="fas fa-map-location-dot"></span></div>

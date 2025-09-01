@@ -132,9 +132,9 @@ while ($row = mysqli_fetch_assoc($query)) {
 $title = "Dashboard";
 include '../../src/template/headers.php';
 ?>
-
 <style>
-    body {
+    body,
+    .swal2-popup {
         font-family: "Poppins", sans-serif;
     }
 
@@ -170,8 +170,8 @@ include '../../src/template/headers.php';
     }
 
     .logo-wrapper.big img {
-        max-width: 150px;
-        max-height: 150px;
+        max-width: 145px;
+        max-height: 145px;
     }
 
     .logo1 {
@@ -184,6 +184,11 @@ include '../../src/template/headers.php';
             width: 200px;
             width: 200px;
         }
+
+        .logo-wrapper.big img {
+            max-width: 135px !important;
+            max-height: 135px !important;
+        }
     }
 
     @media (max-width: 991.98px) {
@@ -192,6 +197,16 @@ include '../../src/template/headers.php';
         .dashboard-card {
             min-height: 180px;
         }
+
+        .logo-wrapper.big img {
+            max-width: 130px !important;
+            max-height: 130px !important;
+        }
+
+        .logo1 {
+            width: 350px;
+            width: 350px;
+        }
     }
 
     @media (max-width: 767.98px) {
@@ -199,6 +214,22 @@ include '../../src/template/headers.php';
         .dashboard-row,
         .dashboard-card {
             min-height: 140px;
+        }
+
+        .logo-wrapper.big img {
+            max-width: 120px !important;
+            max-height: 120px !important;
+        }
+    }
+
+    @media (max-width: 680px) {
+        .logo-wrapper.big img {
+            max-width: 110px !important;
+            max-height: 110px !important;
+        }
+        .logo1 {
+            width: 300px;
+            width: 300px;
         }
     }
 
@@ -209,12 +240,16 @@ include '../../src/template/headers.php';
             min-height: 100px;
         }
 
+        .logo-wrapper.big img {
+            max-width: 125px !important;
+            max-height: 125px !important;
+        }
+
         .dashboard-card img {
-            max-width: 250px !important;
-            max-height: 250px !important;
+            max-width: 300px !important;
+            max-height: 300px !important;
         }
     }
-
 
     .loker-card {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -336,276 +371,121 @@ include '../../src/template/headers.php';
         <?php include('../../src/template/menu.php'); ?>
         <!--end::Sidebar-->
         <!--begin::App Main-->
-        <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'alumni') :?>
-        <main class="app-main">
-            <!--begin::App Content-->
-            <div class="container-fluid">
-                <div class="text-center">
-                    <h1 class="fw-bold text-muted mt-4">APLIKASI BURSA KERJA KHUSUS</h1>
-                </div>
-                <div class="row g-3 mt-4 align-items-stretch dashboard-row">
-                    <div class="col-12 col-md-6 col-lg-6 d-flex">
-                        <div class="card shadow-sm border-0 text-center d-flex justify-content-center align-items-center flex-fill dashboard-card rounded-4 py-4">
-                            <div class="w-100 d-flex flex-column align-items-center justify-content-center">
-                                <img src="../../src/assets/img/logoBKK.png" alt="Logo BKK" class="img-fluid mb-3" style="width: 310px; max-width: 100%; display: block; margin-left: auto; margin-right: auto;">
-                                <div class="fw-bold text-muted fs-5">SMK MAMBA'UL IHSAN</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-6 d-flex">
-                        <div class="card shadow-sm border-0 text-center p-4 flex-fill dashboard-card rounded-4 h-100">
-                            <div class="row h-100">
-                                <div class="col-6 d-flex align-items-center justify-content-center">
-                                    <div class="bg-primary-subtle rounded-3 p-3 w-100 mx-1">
-                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
-                                            <i class="fas fa-users text-white"></i>
-                                        </div>
-                                        <div class="fw-bold fs-5"><?= $total_users; ?></div>
-                                        <div class="text-secondary">Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 d-flex align-items-center justify-content-center">
-                                    <div class="bg-success-subtle rounded-3 p-3 w-100 mx-1">
-                                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
-                                            <i class="fas fa-user-shield text-white"></i>
-                                        </div>
-                                        <div class="fw-bold fs-5"><?= $total_admins; ?></div>
-                                        <div class="text-secondary">Admin</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 d-flex align-items-center justify-content-center mt-3">
-                                    <div class="bg-info-subtle rounded-3 p-3 w-100 mx-1">
-                                        <div class="bg-info rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
-                                            <i class="fas fa-building text-white"></i>
-                                        </div>
-                                        <div class="fw-bold fs-5"><?= $total_perusahaan; ?></div>
-                                        <div class="text-secondary">Perusahaan</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 d-flex align-items-center justify-content-center mt-3">
-                                    <div class="bg-warning-subtle rounded-3 p-3 w-100 mx-1">
-                                        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
-                                            <i class="fas fa-briefcase text-white"></i>
-                                        </div>
-                                        <div class="fw-bold fs-5"><?= $total_loker; ?></div>
-                                        <div class="text-secondary">Loker</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-3 mt-4">
-
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card h-100">
-                            <div class="card-body">
-                                <div class="logo-wrapper big">
-                                    <img src="../../src/assets/img/logo/vokasi-l.png" alt="Vokasi">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card h-100">
-                            <div class="card-body">
-                                <div class="logo-wrapper big">
-                                    <img src="../../src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card">
-                            <div class="card-body">
-                                <div class="logo-wrapper">
-                                    <img src="../../src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card">
-                            <div class="card-body">
-                                <div class="logo-wrapper">
-                                    <img src="../../src/assets/img/logo/dudi.png" alt="DUDI">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Loker Paling Populer Section -->
-                <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
-                    <span>Loker Paling Populer</span>
-                </div>
-                <div class="container mt-4">
-                    <div class="row g-4">
-                        <?php if (mysqli_num_rows($query_popular) > 0): ?>
-                            <?php while ($loker = mysqli_fetch_assoc($query_popular)): ?>
-                                <div class="col-md-6 col-lg-4">
-                                    <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click loker-card h-100 shadow-sm">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo'] ?? 'default.png' ?>"
-                                                    alt="<?= $loker['nama_perusahaan'] ?>"
-                                                    class="loker-img rounded me-3">
-                                                <div>
-                                                    <h6 class="loker-title mb-0"><?= $loker['judul'] ?></h6>
-                                                    <div class="loker-company"><?= $loker['nama_perusahaan'] ?></div>
-                                                </div>
-                                            </div>
-                                            <p class="loker-desc"><?= $loker['deskripsi'] ?></p>
-                                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                                <span class="badge bg-primary loker-badge"><?= $loker['jumlah_lamaran'] ?> Pelamaran</span>
-                                                <small class="loker-date"><?= date('d M Y', strtotime($loker['tanggal_dibuka'])) ?></small>
-                                            </div>
-                                        </div>
-                                        <div class="card-footer bg-transparent">
-                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>"
-                                                class="btn btn-sm btn-outline-primary w-100">Lamar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <div class="col-12">
-                                <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        <div class="col-md-6 col-lg-4">
-                            <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
-                                <div class="card-body d-flex flex-column justify-content-center">
-                                    <div class="d-flex flex-column align-items-center mb-3">
-                                        <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
-                                        <h5 class="">Loker Lainnya <i class="fa-solid fa-arrow-right ms-1"></i></h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Users Online Card -->
-                <div class="card card-round mt-4">
-                    <div class="card-body">
-                        <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
-                        <h2 class="mb-2"><?= $total_online ?></h2>
-                        <p class="text-muted">Users online</p>
-                        <div id="chart-container">
-                            <canvas id="loginChart" style="height:260px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--end::Row-->
-            <!--end::App Content-->
-        </main>
-
-        <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] == 'admin') :?>
-         <main class="app-main">
-            <!--begin::App Content Header-->
-            <div class="app-content-header">
-                <!--begin::Container-->
-                <div class="container-fluid">
-                    <!--begin::Row-->
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <h3 class="mb-0">Dashboard</h3>
-                        </div>
-                    </div>
-                    <!--end::Row-->
-                </div>
-                <!--end::Container-->
-            </div>
-            <!--end::App Content Header-->
-            <!--begin::App Content-->
-            <div class="app-content">
-                <!--begin::Container-->
+        <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'alumni') : ?>
+            <main class="app-main">
+                <!--begin::App Content-->
                 <div class="container-fluid">
                     <div class="text-center">
-                        <h1 class="fw-bold text-muted mt-4 sm: fs-3">APLIKASI BURSA KERJA KHUSUS</h1>
+                        <h1 class="fw-bold text-muted mt-4">APLIKASI BURSA KERJA KHUSUS</h1>
+                    </div>
+                    <div class="row g-3 mt-4 align-items-stretch dashboard-row">
+                        <div class="col-12 col-md-6 col-lg-6 d-flex">
+                            <div class="card shadow-sm border-0 text-center d-flex justify-content-center align-items-center flex-fill dashboard-card rounded-4 py-4">
+                                <div class="w-100 d-flex flex-column align-items-center justify-content-center">
+                                    <img src="../../src/assets/img/logoBKK.png" alt="Logo BKK" class="img-fluid mb-3" style="width: 310px; max-width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                                    <div class="fw-bold text-muted fs-5">SMK MAMBA'UL IHSAN</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-6 d-flex">
+                            <div class="card shadow-sm border-0 text-center p-4 flex-fill dashboard-card rounded-4 h-100">
+                                <div class="row h-100">
+                                    <div class="col-6 d-flex align-items-center justify-content-center">
+                                        <div class="bg-primary-subtle rounded-3 p-3 w-100 mx-1">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                                <i class="fas fa-users text-white"></i>
+                                            </div>
+                                            <div class="fw-bold fs-5"><?= $total_users; ?></div>
+                                            <div class="text-secondary">Users</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 d-flex align-items-center justify-content-center">
+                                        <div class="bg-success-subtle rounded-3 p-3 w-100 mx-1">
+                                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                                <i class="fas fa-user-shield text-white"></i>
+                                            </div>
+                                            <div class="fw-bold fs-5"><?= $total_admins; ?></div>
+                                            <div class="text-secondary">Admin</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 d-flex align-items-center justify-content-center mt-3">
+                                        <div class="bg-info-subtle rounded-3 p-3 w-100 mx-1">
+                                            <div class="bg-info rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                                <i class="fas fa-building text-white"></i>
+                                            </div>
+                                            <div class="fw-bold fs-5"><?= $total_perusahaan; ?></div>
+                                            <div class="text-secondary">Perusahaan</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 d-flex align-items-center justify-content-center mt-3">
+                                        <div class="bg-warning-subtle rounded-3 p-3 w-100 mx-1">
+                                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto" style="width:38px;height:38px;">
+                                                <i class="fas fa-briefcase text-white"></i>
+                                            </div>
+                                            <div class="fw-bold fs-5"><?= $total_loker; ?></div>
+                                            <div class="text-secondary">Loker</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Loker Paling Populer Section -->
+                    <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
+                        <span>Loker Paling Populer</span>
+                    </div>
+                    <div class="container mt-4">
+                        <div class="row g-4">
+                            <?php if (mysqli_num_rows($query_popular) > 0): ?>
+                                <?php while ($loker = mysqli_fetch_assoc($query_popular)): ?>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click loker-card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo'] ?? 'default.png' ?>"
+                                                        alt="<?= $loker['nama_perusahaan'] ?>"
+                                                        class="loker-img rounded me-3">
+                                                    <div>
+                                                        <h6 class="loker-title mb-0"><?= $loker['judul'] ?></h6>
+                                                        <div class="loker-company"><?= $loker['nama_perusahaan'] ?></div>
+                                                    </div>
+                                                </div>
+                                                <p class="loker-desc"><?= $loker['deskripsi'] ?></p>
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <span class="badge bg-primary loker-badge"><?= $loker['jumlah_lamaran'] ?> Pelamaran</span>
+                                                    <small class="loker-date"><?= date('d M Y', strtotime($loker['tanggal_dibuka'])) ?></small>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer bg-transparent">
+                                                <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>"
+                                                    class="btn btn-sm btn-outline-primary w-100">Lamar</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <div class="col-12">
+                                    <div class="alert alert-info text-center">
+                                        <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <div class="col-md-6 col-lg-4">
+                                <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
+                                    <div class="card-body d-flex flex-column justify-content-center">
+                                        <div class="d-flex flex-column align-items-center mb-3">
+                                            <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
+                                            <h5 class="">Loker Lainnya <i class="fa-solid fa-arrow-right ms-1"></i></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row g-3 mt-4">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card shadow-sm border-0 text-center">
-                                <div class="card-body">
-                                    <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#4e73df;">
-                                        <i class="fas fa-users text-white fa-lg"></i>
-                                    </div>
-                                    <p class="text-muted mb-1">Users</p>
-                                    <h4 class="fw-bold"><?= $total_users; ?></h4>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card shadow-sm border-0 text-center">
-                                <div class="card-body">
-                                    <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#1cc88a;">
-                                        <i class="fas fa-user-shield text-white fa-lg"></i>
-                                    </div>
-                                    <p class="text-muted mb-1">Admin</p>
-                                    <h4 class="fw-bold"><?= $total_admins; ?></h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card shadow-sm border-0 text-center">
-                                <div class="card-body">
-                                    <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#36b9cc;">
-                                        <i class="fas fa-building text-white fa-lg"></i>
-                                    </div>
-                                    <p class="text-muted mb-1">Perusahaan</p>
-                                    <h4 class="fw-bold"><?= $total_perusahaan; ?></h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card shadow-sm border-0 text-center">
-                                <div class="card-body">
-                                    <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#f6c23e;">
-                                        <i class="fas fa-briefcase text-white fa-lg"></i>
-                                    </div>
-                                    <p class="text-muted mb-1">Loker</p>
-                                    <h4 class="fw-bold"><?= $total_loker; ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--begin::Row-->
-                    <div class="row g-3 mt-3">
-                        <div class="col-lg-6 col-md-auto text-center ">
-                            <div class="card p-3 flex-column align-items-center justify-content-center">
-                                <img src="../../src/assets/img/logoBKK.png" alt="Logo SMK" class="logo1 mb-n4 mt-n4">
-                                <h2 class="fw-bold text-muted sm: fs-4">SMK MAMBA'UL IHSAN</h2>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-auto">
-                            <div class="card p-3 flex-column align-items-center justify-content-center">
-                                <div id="chart-container">
-                                    <canvas id="lamaranChart"></canvas>
-                                </div>
-                                <div class="text-center mt-2">
-                                    <button class="btn btn-primary btn-sm" onclick="toggleChart()">
-                                        <i class="fa-solid fa-arrows-rotate"></i> Toggle Pie/Doughnut
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-4">
-
-                        <div class="col-sm-6 col-lg-3">
+                        <div class="col-6 col-sm-3 col-lg-3z">
                             <div class="card shadow-sm border-0 text-center logo-card h-100">
                                 <div class="card-body">
                                     <div class="logo-wrapper big">
@@ -615,7 +495,7 @@ include '../../src/template/headers.php';
                             </div>
                         </div>
 
-                        <div class="col-sm-6 col-lg-3">
+                        <div class="col-6 col-sm-3 col-lg-3z">
                             <div class="card shadow-sm border-0 text-center logo-card h-100">
                                 <div class="card-body">
                                     <div class="logo-wrapper big">
@@ -625,7 +505,7 @@ include '../../src/template/headers.php';
                             </div>
                         </div>
 
-                        <div class="col-sm-6 col-lg-3">
+                        <div class="col-6 col-sm-3 col-lg-3z">
                             <div class="card shadow-sm border-0 text-center logo-card">
                                 <div class="card-body">
                                     <div class="logo-wrapper">
@@ -635,7 +515,7 @@ include '../../src/template/headers.php';
                             </div>
                         </div>
 
-                        <div class="col-sm-6 col-lg-3">
+                        <div class="col-6 col-sm-3 col-lg-3z">
                             <div class="card shadow-sm border-0 text-center logo-card">
                                 <div class="card-body">
                                     <div class="logo-wrapper">
@@ -646,23 +526,179 @@ include '../../src/template/headers.php';
                         </div>
                     </div>
 
+                    <!-- Users Online Card -->
                     <div class="card card-round mt-4">
                         <div class="card-body">
                             <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
                             <h2 class="mb-2"><?= $total_online ?></h2>
                             <p class="text-muted">Users online</p>
-                            <i class="fas fa-users-box"></i>
                             <div id="chart-container">
-                                <canvas id="loginChart"></canvas>
+                                <canvas id="loginChart" style="height:260px;"></canvas>
                             </div>
                         </div>
                     </div>
-                    <!--end::Row-->
                 </div>
+                <!--end::Row-->
                 <!--end::App Content-->
-                <!--end::App Content-->
-            </div>
-        </main>
+            </main>
+
+        <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] == 'admin') : ?>
+            <main class="app-main">
+                <!--begin::App Content Header-->
+                <div class="app-content-header">
+                    <!--begin::Container-->
+                    <div class="container-fluid">
+                        <!--begin::Row-->
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h3 class="mb-0">Dashboard</h3>
+                            </div>
+                        </div>
+                        <!--end::Row-->
+                    </div>
+                    <!--end::Container-->
+                </div>
+                <!--end::App Content Header-->
+                <!--begin::App Content-->
+                <div class="app-content">
+                    <!--begin::Container-->
+                    <div class="container-fluid">
+                        <div class="text-center">
+                            <h1 class="fw-bold text-muted mt-4 sm: fs-3">APLIKASI BURSA KERJA KHUSUS</h1>
+                        </div>
+
+                        <div class="row g-3 mt-4">
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center">
+                                    <div class="card-body">
+                                        <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#4e73df;">
+                                            <i class="fas fa-users text-white fa-lg"></i>
+                                        </div>
+                                        <p class="text-muted mb-1">Users</p>
+                                        <h4 class="fw-bold"><?= $total_users; ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center">
+                                    <div class="card-body">
+                                        <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#1cc88a;">
+                                            <i class="fas fa-user-shield text-white fa-lg"></i>
+                                        </div>
+                                        <p class="text-muted mb-1">Admin</p>
+                                        <h4 class="fw-bold"><?= $total_admins; ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center">
+                                    <div class="card-body">
+                                        <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#36b9cc;">
+                                            <i class="fas fa-building text-white fa-lg"></i>
+                                        </div>
+                                        <p class="text-muted mb-1">Perusahaan</p>
+                                        <h4 class="fw-bold"><?= $total_perusahaan; ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center">
+                                    <div class="card-body">
+                                        <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px; height:60px; background-color:#f6c23e;">
+                                            <i class="fas fa-briefcase text-white fa-lg"></i>
+                                        </div>
+                                        <p class="text-muted mb-1">Loker</p>
+                                        <h4 class="fw-bold"><?= $total_loker; ?></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--begin::Row-->
+                        <div class="row g-3 mt-3">
+                            <div class="col-lg-6 col-md-6 text-center ">
+                                <div class="card p-3 flex-column align-items-center justify-content-center">
+                                    <img src="../../src/assets/img/logoBKK.png" alt="Logo SMK" class="logo1 mb-n4 mt-n4">
+                                    <h2 class="fw-bold text-muted sm: fs-4">SMK MAMBA'UL IHSAN</h2>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6">
+                                <div class="card p-3 flex-column align-items-center justify-content-center">
+                                    <div id="chart-container">
+                                        <canvas id="lamaranChart"></canvas>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <button class="btn btn-primary btn-sm" onclick="toggleChart()">
+                                            <i class="fa-solid fa-arrows-rotate"></i> Toggle Pie/Doughnut
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-4">
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center logo-card h-100">
+                                    <div class="card-body">
+                                        <div class="logo-wrapper big">
+                                            <img src="../../src/assets/img/logo/vokasi-l.png" alt="Vokasi">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center logo-card h-100">
+                                    <div class="card-body">
+                                        <div class="logo-wrapper big">
+                                            <img src="../../src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center logo-card">
+                                    <div class="card-body">
+                                        <div class="logo-wrapper">
+                                            <img src="../../src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-sm-3 col-lg-3z">
+                                <div class="card shadow-sm border-0 text-center logo-card">
+                                    <div class="card-body">
+                                        <div class="logo-wrapper">
+                                            <img src="../../src/assets/img/logo/dudi.png" alt="DUDI">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-round mt-4">
+                            <div class="card-body">
+                                <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
+                                <h2 class="mb-2"><?= $total_online ?></h2>
+                                <p class="text-muted">Users online</p>
+                                <i class="fas fa-users-box"></i>
+                                <div id="chart-container">
+                                    <canvas id="loginChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end::Row-->
+                    </div>
+                    <!--end::App Content-->
+                    <!--end::App Content-->
+                </div>
+            </main>
 
         <?php endif; ?>
         <!--end::App Main-->
