@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 27 Agu 2025 pada 20.07
+-- Waktu pembuatan: 01 Sep 2025 pada 15.57
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -151,7 +151,15 @@ INSERT INTO `log_login` (`id`, `id_user`, `waktu_login`, `ip_address`, `user_age
 (39, 40, '2025-08-26 13:38:37', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
 (40, 40, '2025-08-26 14:49:16', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
 (41, 38, '2025-08-26 14:49:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
-(42, 35, '2025-08-28 00:02:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36');
+(42, 35, '2025-08-28 00:02:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(43, 35, '2025-08-31 15:13:38', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(44, 40, '2025-08-31 15:18:46', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(45, 35, '2025-08-31 15:56:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(46, 40, '2025-08-31 15:57:05', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(47, 35, '2025-09-01 14:01:15', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(48, 35, '2025-09-01 20:38:08', '::1', 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36'),
+(49, 35, '2025-09-01 20:40:55', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'),
+(50, 40, '2025-09-01 20:54:30', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36');
 
 -- --------------------------------------------------------
 
@@ -178,8 +186,8 @@ CREATE TABLE `lowongan` (
 
 INSERT INTO `lowongan` (`id_lowongan`, `id_perusahaan`, `judul`, `deskripsi`, `persyaratan`, `mata_uang`, `gaji`, `kpn_gaji_diberi`, `tanggal_dibuka`, `tanggal_ditutup`) VALUES
 (30, 2, 'Dev', 'Harus semangat', 'Lulusan IT,Bisa HTML CSS dan JS', 'Rp', '2.500.000', 'B', '2025-08-02', '2025-08-13'),
-(74, 6, 'Kasir', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'B', '2025-08-11', '2025-08-30'),
-(79, 6, 'devDigital', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'M', '2025-08-24', '2025-08-27');
+(74, 6, 'Kasir', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'B', '2025-08-11', '2025-09-05'),
+(79, 6, 'devDigital', 'Tidak ada deskripsi', 'Tidak ada persyaratan', 'Rp', '1.000.000', 'M', '2025-08-24', '2025-09-05');
 
 -- --------------------------------------------------------
 
@@ -198,7 +206,8 @@ CREATE TABLE `online_users` (
 --
 
 INSERT INTO `online_users` (`id`, `id_user`, `last_activity`) VALUES
-(40, 38, '2025-08-26 14:49:33');
+(40, 38, '2025-08-26 14:49:33'),
+(49, 40, '2025-09-01 20:54:30');
 
 -- --------------------------------------------------------
 
@@ -407,7 +416,7 @@ ALTER TABLE `lamaran`
 -- AUTO_INCREMENT untuk tabel `log_login`
 --
 ALTER TABLE `log_login`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT untuk tabel `lowongan`
@@ -419,7 +428,7 @@ ALTER TABLE `lowongan`
 -- AUTO_INCREMENT untuk tabel `online_users`
 --
 ALTER TABLE `online_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT untuk tabel `pengumuman`
