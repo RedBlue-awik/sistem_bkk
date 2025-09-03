@@ -557,6 +557,9 @@ while ($row = mysqli_fetch_assoc($query)) {
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 col-md-8">
+                        <input type="search" id="searchLoker" class="form-control search-clearable" style="min-width:180px;" placeholder="Cari loker, perusahaan, bidang..." autocomplete="off">
+                    </div>
                     <!-- Loker Paling Populer Section -->
                     <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
                         <span>Loker Paling Populer</span>
@@ -611,55 +614,8 @@ while ($row = mysqli_fetch_assoc($query)) {
                     </div>
                 </div>
 
-                <div class="row g-3 mt-4">
-
-                    <div class="fw-semibold text-center fs-4 p-3 bg-success-subtle bg-opacity-10 border border-success border-start-0 border-end-0 mt-4">
-                        <span>Mitra SMK</span>
-                    </div>
-
-                    <div class="col-6 col-sm-3 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card h-100">
-                            <div class="card-body">
-                                <div class="logo-wrapper big">
-                                    <img src="./src/assets/img/logo/vokasi-l.png" alt="Vokasi">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-sm-3 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card h-100">
-                            <div class="card-body">
-                                <div class="logo-wrapper big">
-                                    <img src="./src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-sm-3 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card">
-                            <div class="card-body">
-                                <div class="logo-wrapper">
-                                    <img src="./src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6 col-sm-3 col-lg-3">
-                        <div class="card shadow-sm border-0 text-center logo-card">
-                            <div class="card-body">
-                                <div class="logo-wrapper">
-                                    <img src="./src/assets/img/logo/dudi.png" alt="DUDI">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Users Online Card -->
-                <div class="card card-round mt-4">
+                <!-- <div class="card card-round mt-4">
                     <div class="card-body">
                         <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
                         <h2 class="mb-2"><?= $total_online ?></h2>
@@ -668,7 +624,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                             <canvas id="loginChart" style="height:260px;"></canvas>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
             <!--end::Row-->
             <!--end::App Content-->
@@ -676,19 +632,76 @@ while ($row = mysqli_fetch_assoc($query)) {
         <!--end::App Main-->
         <!--begin::Footer-->
         <footer class="app-footer">
+
+
+            <div class="col-12 col-md-6 col-lg-6 d-flex">
+                <!--begin::Copyright-->
+                <strong>
+                    <?php
+                    $tahun_sekarang = date("Y");
+                    ?>
+                    Copyright &copy; <?= $tahun_sekarang; ?>&nbsp;
+                    <a href="" class="text-decoration-none">SMK MAMBA'UL IHSAN</a>.
+                </strong>
+                All rights reserved.
+                <!--end::Copyright-->
+
+
+                <div class="w-100 d-flex flex-column align-items-center justify-content-center">
+                    <img src="./src/assets/img/logoBKK.png" alt="Logo BKK" class="img-fluid mb-3" style="width: 310px; max-width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                    <div class="fw-bold text-muted fs-5">SMK MAMBA'UL IHSAN</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-4">
+
+                <div class="fw-semibold text-center fs-4 p-3 bg-success-subtle bg-opacity-10 border border-success border-start-0 border-end-0 mt-4">
+                    <span>Mitra SMK</span>
+                </div>
+
+                <div class="col-6 col-sm-3 col-lg-3">
+                    <div class="card shadow-sm border-0 text-center logo-card h-100">
+                        <div class="card-body">
+                            <div class="logo-wrapper big">
+                                <img src="./src/assets/img/logo/vokasi-l.png" alt="Vokasi">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-sm-3 col-lg-3">
+                    <div class="card shadow-sm border-0 text-center logo-card h-100">
+                        <div class="card-body">
+                            <div class="logo-wrapper big">
+                                <img src="./src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-sm-3 col-lg-3">
+                    <div class="card shadow-sm border-0 text-center logo-card">
+                        <div class="card-body">
+                            <div class="logo-wrapper">
+                                <img src="./src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-sm-3 col-lg-3">
+                    <div class="card shadow-sm border-0 text-center logo-card">
+                        <div class="card-body">
+                            <div class="logo-wrapper">
+                                <img src="./src/assets/img/logo/dudi.png" alt="DUDI">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!--begin::To the end-->
             <div class="float-end d-none d-sm-inline">Anything you want</div>
             <!--end::To the end-->
-            <!--begin::Copyright-->
-            <strong>
-                <?php
-                $tahun_sekarang = date("Y");
-                ?>
-                Copyright &copy; <?= $tahun_sekarang; ?>&nbsp;
-                <a href="" class="text-decoration-none">SMK MAMBA'UL IHSAN</a>.
-            </strong>
-            All rights reserved.
-            <!--end::Copyright-->
         </footer>
         <!--end::Footer-->
     </div>
@@ -760,7 +773,7 @@ while ($row = mysqli_fetch_assoc($query)) {
         integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
         crossorigin="anonymous"></script>
     <!-- ChartJS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Chart Login Alumni
         const loginData = {
@@ -810,7 +823,7 @@ while ($row = mysqli_fetch_assoc($query)) {
         };
 
         new Chart(document.getElementById('loginChart'), loginConfig);
-    </script>
+    </script> -->
     <script
         src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"
         integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y="

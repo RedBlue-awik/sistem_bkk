@@ -344,7 +344,7 @@
                                     </div>
 
                                     <div class="input-group input-group-custom">
-                                        <span class="input-group-text input-group-text-custom2">
+                                        <span class="input-group-text input-group-text-custom2 rounded-start">
                                             <i class="fas fa-tags"></i>
                                         </span>
                                         <div class="form-floating me-2">
