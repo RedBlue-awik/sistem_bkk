@@ -185,6 +185,20 @@ $query_popular = mysqli_query($conn, "
     ORDER BY jumlah_lamaran DESC, l.tanggal_dibuka DESC
     LIMIT 8
 ");
+
+// Query untuk mendapatkan kategori loker paling populer (berdasarkan jumlah lamaran)
+$kategori_popular = mysqli_query($conn, "
+    SELECT l.*, p.bidang_usaha, COUNT(lam.id_lamaran) as jumlah_lamaran
+    FROM lowongan l
+    LEFT JOIN lamaran lam ON l.id_lowongan = lam.id_lowongan
+    JOIN perusahaan p ON l.id_perusahaan = p.id_perusahaan
+    WHERE l.tanggal_dibuka <= CURDATE() AND l.tanggal_ditutup >= CURDATE()
+    GROUP BY l.id_lowongan
+    HAVING jumlah_lamaran > 0
+    ORDER BY jumlah_lamaran DESC, l.tanggal_dibuka DESC
+    LIMIT 8
+");
+
 // Panggil lamaran
 $query = mysqli_query($conn, "
     SELECT p.nama_perusahaan, COUNT(*) AS total
@@ -200,6 +214,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     $data[] = (int)$row['total'];
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -212,7 +227,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     <meta name="author" content="ColorlibHQ" />
     <meta name="description" content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS." />
     <meta name="keywords" content="bootstrap 5, bootstrap, admin dashboard, charts, datatable, colorlibhq" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" crossorigin="anonymous" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -229,7 +244,101 @@ while ($row = mysqli_fetch_assoc($query)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
+        .app-footer {
+            border-top: 4px solid rgba(14, 91, 158, .8);
+            color: #fff;
+            padding: 1rem 0;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: white;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background-color: white !important;
+            transform: translateY(-3px);
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .contact-info i {
+            color: white;
+            margin-right: 10px;
+            margin-top: 4px;
+            width: 16px;
+        }
+
+        .logo-section {
+            background-color: rgba(14, 91, 158, .3);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .logo-section img {
+            max-height: 150px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mitra-card {
+            background-color: rgb(255, 255, 255);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            filter: saturate(180%);
+            border: 1px solid rgba(225, 225, 225, 0.3);
+            border-radius: 0.5rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .mitra-card img {
+            max-height: 100px;
+        }
+
+        .copyright {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            color: #adb5bd;
+        }
+
         body,
         .swal2-popup {
             font-family: "Poppins", sans-serif;
@@ -301,12 +410,10 @@ while ($row = mysqli_fetch_assoc($query)) {
 
         .logo1 {
             width: 350px;
-            width: 350px;
         }
 
         @media (max-width: 1000px) {
             .logo1 {
-                width: 200px;
                 width: 200px;
             }
 
@@ -367,7 +474,6 @@ while ($row = mysqli_fetch_assoc($query)) {
             }
         }
 
-
         .loker-card {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             border-radius: 0.75rem;
@@ -376,7 +482,19 @@ while ($row = mysqli_fetch_assoc($query)) {
         }
 
         .loker-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .kategori-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 0.5rem;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .kategori-card:hover {
+            transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
@@ -419,6 +537,148 @@ while ($row = mysqli_fetch_assoc($query)) {
             font-size: 0.8rem;
             color: #6c757d;
         }
+
+        /* Responsive Footer Styles */
+        @media (max-width: 991.98px) {
+            .app-footer {
+                padding: 1.5rem 0;
+            }
+
+            .footer-title {
+                margin-bottom: 0.75rem;
+                font-size: 1.1rem;
+            }
+
+            .contact-info {
+                margin-bottom: 0.5rem;
+                font-size: 0.95rem;
+            }
+
+            .logo-section {
+                padding: 1.5rem;
+                margin-top: 1.5rem;
+            }
+
+            .logo-section img {
+                max-height: 100px;
+            }
+
+            .logo-section h5 {
+                font-size: 1.1rem;
+            }
+
+            .mitra-card img {
+                max-height: 120px;
+            }
+
+            .copyright {
+                padding-top: 1rem;
+                margin-top: 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .app-footer {
+                padding: 1.5rem 0;
+            }
+
+            .footer-title {
+                margin-bottom: 0.5rem;
+                font-size: 1rem;
+            }
+
+            .contact-info {
+                margin-bottom: 0.4rem;
+                font-size: 0.9rem;
+            }
+
+            .social-icons a {
+                width: 32px;
+                height: 32px;
+                margin-right: 6px;
+            }
+
+            .logo-section {
+                padding: 1.25rem;
+                margin-top: 1rem;
+            }
+
+            .logo-section img {
+                max-height: 90px;
+                margin-bottom: 1rem;
+            }
+
+            .logo-section h5 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .mitra-card {
+                padding: 0.75rem;
+            }
+
+            .mitra-card img {
+                max-height: 110px;
+            }
+
+            .copyright {
+                padding-top: 0.75rem;
+                margin-top: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .app-footer {
+                padding: 1rem 0;
+            }
+
+            .footer-title {
+                margin-bottom: 0.4rem;
+                font-size: 0.95rem;
+            }
+
+            .contact-info {
+                margin-bottom: 0.3rem;
+                font-size: 0.85rem;
+            }
+
+            .social-icons a {
+                width: 30px;
+                height: 30px;
+                margin-right: 5px;
+            }
+
+            .logo-section {
+                padding: 1rem;
+                margin-top: 0.75rem;
+            }
+
+            .logo-section img {
+                max-height: 80px;
+                margin-bottom: 0.75rem;
+            }
+
+            .logo-section h5 {
+                font-size: 0.95rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .mitra-card {
+                padding: 0.5rem;
+            }
+
+            .mitra-card img {
+                max-height: 90px;
+            }
+
+            .copyright {
+                padding-top: 0.5rem;
+                margin-top: 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 
@@ -439,7 +699,6 @@ while ($row = mysqli_fetch_assoc($query)) {
                 </ul>
                 <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto">
-
                     <!--begin::User Menu Dropdown-->
                     <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-pen-to-square me-2"></i>Daftar</button>
                     <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</button>
@@ -450,6 +709,7 @@ while ($row = mysqli_fetch_assoc($query)) {
             <!--end::Container-->
         </nav>
         <!--end::Header-->
+
         <!--begin::Sidebar-->
         <aside class="app-sidebar bg-primary-subtle shadow" data-bs-theme="dark">
             <div class="sidebar-brand d-flex justify-content-start">
@@ -499,6 +759,7 @@ while ($row = mysqli_fetch_assoc($query)) {
             </div>
         </aside>
         <!--end::Sidebar-->
+
         <!--begin::App Main-->
         <main class="app-main">
             <!--begin::App Content-->
@@ -506,6 +767,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                 <div class="text-center">
                     <h1 class="fw-bold text-muted mt-4">APLIKASI BURSA KERJA KHUSUS</h1>
                 </div>
+
                 <div class="row g-3 mt-4 align-items-stretch dashboard-row">
                     <div class="col-12 col-md-6 col-lg-6 d-flex">
                         <div class="card shadow-sm border-0 text-center d-flex justify-content-center align-items-center flex-fill dashboard-card rounded-4 py-4">
@@ -515,6 +777,7 @@ while ($row = mysqli_fetch_assoc($query)) {
                             </div>
                         </div>
                     </div>
+
                     <div class="col-12 col-md-6 col-lg-6 d-flex">
                         <div class="card shadow-sm border-0 text-center p-4 flex-fill dashboard-card rounded-4 h-100">
                             <div class="row h-100">
@@ -557,13 +820,19 @@ while ($row = mysqli_fetch_assoc($query)) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-8">
-                        <input type="search" id="searchLoker" class="form-control search-clearable" style="min-width:180px;" placeholder="Cari loker, perusahaan, bidang..." autocomplete="off">
+
+                    <div class="col-12" style="margin-top: 2rem;">
+                        <form id="searchForm" method="POST" action="./pages/public/loker.php" class="w-100 d-flex justify-content-center">
+                            <input type="search" id="searchLoker" name="search" class="form-control search-clearable" style="max-width:50rem;" placeholder="Cari loker, perusahaan, bidang-usaha, dll" autocomplete="off">
+                            <button type="submit" class="btn text-light ms-2" style="background: #072757;">Cari</button>
+                        </form>
                     </div>
+
                     <!-- Loker Paling Populer Section -->
                     <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0 mt-4">
                         <span>Loker Paling Populer</span>
                     </div>
+
                     <div class="container mt-4">
                         <div class="row g-4">
                             <?php if (mysqli_num_rows($query_popular) > 0): ?>
@@ -596,12 +865,13 @@ while ($row = mysqli_fetch_assoc($query)) {
                             <?php else: ?>
                                 <div class="col-12">
                                     <div class="alert alert-info text-center">
-                                        <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja tersedia
+                                        <i class="fas fa-info-circle me-2"></i> Belum ada lowongan kerja yang tersedia
                                     </div>
                                 </div>
                             <?php endif; ?>
+
                             <div class="col-md-6 col-lg-4">
-                                <div data-id="<?= $loker['id_lowongan'] ?>" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
+                                <div data-id="all" class="card card-click-all bg-secondary-subtle loker-card h-100 shadow-sm">
                                     <div class="card-body d-flex flex-column justify-content-center">
                                         <div class="d-flex flex-column align-items-center mb-3">
                                             <span class="mb-1" style="font-size: 90px;"><i class="bi bi-briefcase-fill"></i></span>
@@ -612,119 +882,153 @@ while ($row = mysqli_fetch_assoc($query)) {
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Users Online Card -->
-                <!-- <div class="card card-round mt-4">
-                    <div class="card-body">
-                        <i class="fa-solid fa-users-between-lines position-absolute top-0 end-0 m-3 fs-3"></i>
-                        <h2 class="mb-2"><?= $total_online ?></h2>
-                        <p class="text-muted">Users online</p>
-                        <div id="chart-container">
-                            <canvas id="loginChart" style="height:260px;"></canvas>
+                    <!-- Kategori Loker Paling Populer Section -->
+                    <div class="fw-semibold text-center fs-4 p-3 bg-info bg-opacity-10 border border-info border-start-0 border-end-0" style="margin-top: 3.5rem;">
+                        <span>Kategori Paling Populer</span>
+                    </div>
+
+                    <div class="container mt-4 mb-5">
+                        <div class="row g-4">
+                            <?php if (mysqli_num_rows($kategori_popular) > 0): ?>
+                                <?php $kategori = mysqli_fetch_assoc($kategori_popular); ?>
+                                <div class="col-md-6 col-lg-4">
+                                    <div data-id="<?= $kategori['id_lowongan'] ?>" class="card card-click kategori-card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <h2>
+                                                    <?= $kategori['bidang_usaha'] ?>
+                                                </h2>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="col-12">
+                                    <div class="alert alert-info text-center">
+                                        <i class="fas fa-info-circle me-2"></i> Belum ada Kategori yang tersedia
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
-            <!--end::Row-->
             <!--end::App Content-->
         </main>
         <!--end::App Main-->
+
         <!--begin::Footer-->
-        <footer class="app-footer">
+        <footer class="app-footer bg-primary-subtle" data-bs-theme="dark">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Kolom informasi -->
+                    <div class="col-lg-6 col-md-6">
+                        <h5 class="footer-title mb-3">Tentang Kami</h5>
+                        <p>SMK MAMBA'UL IHSAN adalah sekolah kejuruan yang berkomitmen untuk menghasilkan lulusan yang kompeten, profesional, dan berakhlak mulia.</p>
+                        <div class="social-icons mt-4">
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-youtube"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="fab fa-tiktok"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><img src="./src/assets/img/logo.png" style="max-width: 50px;"></a>
+                        </div>
+                    </div>
 
+                    <!-- Kolom kontak -->
+                    <div class="col-lg-6 col-md-6">
+                        <h5 class="footer-title mb-3">Kontak Kami</h5>
+                        <div class="contact-info mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            <span>Jl. Pendidikan No. 123, Jawa Tengah, Indonesia</span>
+                        </div>
+                        <div class="contact-info mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                            <span>(0283) 123456</span>
+                        </div>
+                        <div class="contact-info mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                            <span>info@smkmambaulihsan.sch.id</span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="col-12 col-md-6 col-lg-6 d-flex">
-                <!--begin::Copyright-->
-                <strong>
-                    <?php
-                    $tahun_sekarang = date("Y");
-                    ?>
-                    Copyright &copy; <?= $tahun_sekarang; ?>&nbsp;
-                    <a href="" class="text-decoration-none">SMK MAMBA'UL IHSAN</a>.
-                </strong>
-                All rights reserved.
-                <!--end::Copyright-->
+                <!-- Logo BKK -->
+                <div class="logo-section">
+                    <img src="./src/assets/img/logo.png" alt="Logo SMK MI">
+                    <h5 class="fw-bold">SMK MAMBA'UL IHSAN</h5>
+                </div>
 
+                <!-- Mitra SMK -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <h4 class="text-center mb-4">Mitra SMK Mamba'ul Ihsan</h4>
+                    </div>
 
-                <div class="w-100 d-flex flex-column align-items-center justify-content-center">
-                    <img src="./src/assets/img/logoBKK.png" alt="Logo BKK" class="img-fluid mb-3" style="width: 310px; max-width: 100%; display: block; margin-left: auto; margin-right: auto;">
-                    <div class="fw-bold text-muted fs-5">SMK MAMBA'UL IHSAN</div>
+                    <div class="col-6 col-md-4 col-lg-3 mb-3">
+                        <div class="mitra-card">
+                            <img src="./src/assets/img/logo/vokasi-l.png" style="max-width: 130px;" alt="Vokasi">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 mb-3">
+                        <div class="mitra-card">
+                            <img src="./src/assets/img/logo/smk-hebat.png" style="min-width: 130px; min-height: 130px;" alt="SMK Hebat">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 mb-3">
+                        <div class="mitra-card">
+                            <img src="./src/assets/img/logo/smk_pk_logo.png" style="max-width: 120px;" alt="SMK PK">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 mb-3">
+                        <div class="mitra-card">
+                            <img src="./src/assets/img/logo/dudi.png" alt="DUDI">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copyright -->
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0 text-nowrap">
+                            <strong>
+                                Copyright &copy; <?= date("Y"); ?> SMK MAMBA'UL IHSAN.
+                            </strong>
+                            <br>All rights reserved.
+                        </div>
+                        <div class="col-md-6 text-center text-md-end ">
+                            <span>Developer By SMK MAMBA'UL IHSAN</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="row g-3 mt-4">
-
-                <div class="fw-semibold text-center fs-4 p-3 bg-success-subtle bg-opacity-10 border border-success border-start-0 border-end-0 mt-4">
-                    <span>Mitra SMK</span>
-                </div>
-
-                <div class="col-6 col-sm-3 col-lg-3">
-                    <div class="card shadow-sm border-0 text-center logo-card h-100">
-                        <div class="card-body">
-                            <div class="logo-wrapper big">
-                                <img src="./src/assets/img/logo/vokasi-l.png" alt="Vokasi">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-sm-3 col-lg-3">
-                    <div class="card shadow-sm border-0 text-center logo-card h-100">
-                        <div class="card-body">
-                            <div class="logo-wrapper big">
-                                <img src="./src/assets/img/logo/smk-hebat.png" alt="SMK Hebat">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-sm-3 col-lg-3">
-                    <div class="card shadow-sm border-0 text-center logo-card">
-                        <div class="card-body">
-                            <div class="logo-wrapper">
-                                <img src="./src/assets/img/logo/smk_pk_logo.png" alt="SMK PK">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-sm-3 col-lg-3">
-                    <div class="card shadow-sm border-0 text-center logo-card">
-                        <div class="card-body">
-                            <div class="logo-wrapper">
-                                <img src="./src/assets/img/logo/dudi.png" alt="DUDI">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--begin::To the end-->
-            <div class="float-end d-none d-sm-inline">Anything you want</div>
-            <!--end::To the end-->
         </footer>
         <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+
     <!-- begin::Modal -->
-
     <?php include './src/template/modalForm.php'; ?>
-
     <!-- end::Modal -->
+
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <script
-        src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"
-        integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ="
-        crossorigin="anonymous"></script>
-    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ=" crossorigin="anonymous"></script>
+    <!--end::Third Party Plugin(OverlayScrollbars)-->
+
+    <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
-    <!-- Bootstrap Bundle with Popper -->
+    <!--end::Required Plugin(popperjs for Bootstrap 5)-->
+
+    <!--begin::Required Plugin(Bootstrap 5)-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+    <!--end::Required Plugin(Bootstrap 5)-->
+
+    <!--begin::Required Plugin(AdminLTE)-->
     <script src="./src/assets/js/adminlte.js"></script>
-    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
+    <!--end::Required Plugin(AdminLTE)-->
+
+    <!--begin::OverlayScrollbars Configure-->
     <script>
         const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
         const Default = {
@@ -748,10 +1052,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     <!--end::OverlayScrollbars Configure-->
 
     <!-- sortablejs -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
-        integrity="sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ="
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ=" crossorigin="anonymous"></script>
     <!-- sortablejs -->
     <script>
         const connectedSortables = document.querySelectorAll('.connectedSortable');
@@ -761,77 +1062,18 @@ while ($row = mysqli_fetch_assoc($query)) {
                 handle: '.card-header',
             });
         });
-
         const cardHeaders = document.querySelectorAll('.connectedSortable .card-header');
         cardHeaders.forEach((cardHeader) => {
             cardHeader.style.cursor = 'move';
         });
     </script>
+
     <!-- apexcharts -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
-        integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
-        crossorigin="anonymous"></script>
-    <!-- ChartJS -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Chart Login Alumni
-        const loginData = {
-            labels: <?= json_encode($bulan_labels); ?>,
-            datasets: [{
-                label: 'Jumlah Alumni Login',
-                data: <?= json_encode($jumlah_data); ?>,
-                data: <?= json_encode($jumlah_data); ?>,
-                borderColor: 'rgba(23, 125, 255, 1)',
-                backgroundColor: 'rgba(23, 125, 255, 0.2)',
-                pointBackgroundColor: 'rgba(23, 125, 255, 1)',
-                pointRadius: 5,
-                pointBackgroundColor: 'rgba(23, 125, 255, 1)',
-                pointRadius: 5,
-                fill: true,
-                tension: 0.4
-            }]
-        };
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js" integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
 
-        const loginConfig = {
-            type: 'line',
-            data: loginData,
-            maintainAspectRatio: false,
-            options: {
-                responsive: true,
-                responsive: true,
-                animations: {
-                    y: {
-                        easing: 'easeInOutElastic',
-                        from: (ctx) => {
-                            if (ctx.type === 'data') {
-                                if (ctx.mode === 'default' && !ctx.dropped) {
-                                    ctx.dropped = true;
-                                    return 0;
-                                }
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                }
-            }
-        };
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js" integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js" integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY=" crossorigin="anonymous"></script>
 
-        new Chart(document.getElementById('loginChart'), loginConfig);
-    </script> -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"
-        integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y="
-        crossorigin="anonymous"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"
-        integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY="
-        crossorigin="anonymous"></script>
     <!-- jsvectormap -->
     <script>
         const visitorsData = {
@@ -864,14 +1106,11 @@ while ($row = mysqli_fetch_assoc($query)) {
         document.addEventListener('DOMContentLoaded', function() {
             // Seleksi semua tombol hapus
             const deleteButtons = document.querySelectorAll('.btn-hapus');
-
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault(); // Mencegah langsung ke link
-
                     const adminId = this.dataset.id;
                     const href = this.getAttribute('href');
-
                     Swal.fire({
                         title: 'Yakin ingin menghapus?',
                         text: "Data akan hilang permanen!",
@@ -894,7 +1133,6 @@ while ($row = mysqli_fetch_assoc($query)) {
     <!-- end::SweetAlertKonfirmasi -->
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         // SweetAlert untuk button logout
         // Ambil semua elemen dengan class btn-logout
@@ -902,7 +1140,6 @@ while ($row = mysqli_fetch_assoc($query)) {
             button.addEventListener('click', function(e) {
                 e.preventDefault(); // Mencegah tautan langsung
                 const href = this.getAttribute('href'); // Ambil tautan href
-
                 Swal.fire({
                     title: 'Konfirmasi Logout',
                     text: "Apakah Anda yakin ingin logout?",
@@ -925,6 +1162,7 @@ while ($row = mysqli_fetch_assoc($query)) {
     <script src="./src/assets/js/jquery-3.7.1.min.js"></script>
     <!-- jQuery (paling atas) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!-- Badge -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -960,12 +1198,10 @@ while ($row = mysqli_fetch_assoc($query)) {
                     // Kirim request untuk menandai sudah dilihat
                     fetch('./src/config/proses-pengumuman.php?viewed=true&t=' + Date.now())
                         .then(() => updateBadge());
-
                     // Jika ini link di sidebar, biarkan navigasi tetap berjalan
                     if (this.closest('.app-sidebar')) {
                         return true;
                     }
-
                     // Jika di tempat lain, bisa ditambahkan logika khusus
                     e.preventDefault();
                     window.location.href = this.href;
@@ -980,10 +1216,8 @@ while ($row = mysqli_fetch_assoc($query)) {
         // Example starter JavaScript for disabling form submissions if there are invalid fields
         (() => {
             'use strict'
-
             // Fetch all the forms we want to apply custom Bootstrap validation styles to
             const forms = document.querySelectorAll('.needs-validation')
-
             // Loop over them and prevent submission
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', event => {
@@ -991,7 +1225,6 @@ while ($row = mysqli_fetch_assoc($query)) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
-
                     form.classList.add('was-validated')
                 }, false)
             })
@@ -1005,13 +1238,11 @@ while ($row = mysqli_fetch_assoc($query)) {
             card.addEventListener('click', function(e) {
                 // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
                 if (e.target.closest('a')) return;
-
                 const id = this.getAttribute('data-id');
                 window.open(`./pages/public/detail_loker.php?id_lowongan=${id}`);
             });
         });
     </script>
-    <!-- End::Details -->
 
     <script>
         document.querySelectorAll('.card-click-all').forEach(card => {
@@ -1022,7 +1253,49 @@ while ($row = mysqli_fetch_assoc($query)) {
             });
         });
     </script>
+    <!-- End::Details -->
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchLoker');
+            const searchButton = document.querySelector('button[type="button"]');
+
+            // Event listener untuk tombol cari
+            searchButton.addEventListener('click', function() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    // Arahkan ke halaman loker dengan parameter pencarian
+                    window.location.href = './pages/public/loker.php?search=' + encodeURIComponent(searchTerm);
+                } else {
+                    // Jika kosong, arahkan ke halaman index tanpa parameter
+                    window.location.href = 'index.php';
+                }
+            });
+
+            // Event listener untuk tombol Enter di input pencarian
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchLoker');
+
+            searchForm.addEventListener('submit', function(e) {
+                const searchTerm = searchInput.value.trim();
+
+                // Cegah submit jika input kosong
+                if (!searchTerm) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

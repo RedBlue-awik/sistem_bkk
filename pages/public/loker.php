@@ -131,6 +131,26 @@ function getCvFile($id_alumni, $id_lowongan)
     return null;
 }
 
+// Cek apakah ada pencarian dari halaman index.php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
+    $searchTerm = trim($_POST['search']);
+    if (!empty($searchTerm)) {
+        // Simpan kata kunci pencarian di session
+        $_SESSION['search_from_index'] = $searchTerm;
+    }
+    // Redirect ke halaman ini dengan method GET agar tidak ada POST data
+    header("Location: " . basename(__FILE__));
+    exit();
+}
+
+// Ambil kata kunci dari session jika ada
+$searchFromIndex = isset($_SESSION['search_from_index']) ? $_SESSION['search_from_index'] : '';
+
+// Hapus session pencarian setelah diambil agar tidak muncul di refresh berikutnya
+if (isset($_SESSION['search_from_index'])) {
+    unset($_SESSION['search_from_index']);
+}
+
 ?>
 
 <!doctype html>
@@ -954,21 +974,32 @@ include '../../src/template/headers.php'
 
     <script>
         $(function() {
-            // --- Search & Clear Button ---
+            // Ambil kata kunci dari session (jika ada)
+            const searchFromIndex = "<?= htmlspecialchars($searchFromIndex) ?>";
+
+            // Jika ada kata kunci dari session, isi ke input pencarian dan lakukan pencarian
+            if (searchFromIndex) {
+                $('#searchLoker').val(searchFromIndex);
+                // Hapus session setelah digunakan agar tidak berpengaruh di reload berikutnya
+                $.post('', {
+                    clear_search_session: 1
+                });
+
+                // Trigger pencarian otomatis
+                setTimeout(function() {
+                    $('#searchLoker').trigger('input');
+                }, 100);
+            }
+
+            // --- Script pencarian yang sudah ada (tidak diubah) ---
             $('#searchLoker').on('input search', function() {
                 filterAndPaginate();
             });
-            // Optional: clear on native X click (for browsers that don't fire 'input' on clear)
-            $('#searchLoker').on('search', function() {
-                filterAndPaginate();
-            });
 
-            // --- Per Page Dropdown ---
             $('#perPage').on('change', function() {
                 filterAndPaginate();
             });
 
-            // --- Pagination Click ---
             $('#paginationLoker').on('click', 'li.page-item:not(.disabled) a', function(e) {
                 e.preventDefault();
                 let page = $(this).data('page');
@@ -978,7 +1009,6 @@ include '../../src/template/headers.php'
                 }
             });
 
-            // --- Filtering, Pagination, and Rendering ---
             window.currentPage = 1;
 
             function filterAndPaginate() {
@@ -993,6 +1023,7 @@ include '../../src/template/headers.php'
                     let judul = $el.data('judul');
                     let perusahaan = $el.data('perusahaan');
                     let bidang = $el.data('bidang');
+
                     if (
                         search === '' ||
                         (judul && judul.includes(search)) ||
@@ -1003,28 +1034,25 @@ include '../../src/template/headers.php'
                     }
                 });
 
-                // Pagination
                 let total = filtered.length;
                 let totalPages = Math.ceil(total / perPage) || 1;
                 if (window.currentPage > totalPages) window.currentPage = totalPages;
                 let start = (window.currentPage - 1) * perPage;
                 let end = start + perPage;
 
-                // Hide all, then show filtered & paginated
                 $cards.hide();
-                if ($adminCard.length) $adminCard.show(); // always show admin add card
+                if ($adminCard.length) $adminCard.show();
+
                 filtered.forEach(function($el, idx) {
                     if (idx >= start && idx < end) $el.show();
                 });
 
-                // Tampilkan pesan jika tidak ada loker ditemukan
                 if (filtered.length === 0) {
                     $('#notFoundLoker').show();
                 } else {
                     $('#notFoundLoker').hide();
                 }
 
-                // Render pagination
                 renderPagination(window.currentPage, totalPages);
             }
 
@@ -1034,28 +1062,27 @@ include '../../src/template/headers.php'
                 if (total <= 1) return;
 
                 let prev = `<li class="page-item${current === 1 ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current - 1}" tabindex="-1">&laquo;</a>
-            </li>`;
+            <a class="page-link" href="#" data-page="${current - 1}" tabindex="-1">&laquo;</a>
+        </li>`;
                 $ul.append(prev);
 
-                // Show max 5 pages
                 let start = Math.max(1, current - 2);
                 let end = Math.min(total, start + 4);
                 if (end - start < 4) start = Math.max(1, end - 4);
 
                 for (let i = start; i <= end; i++) {
                     $ul.append(`<li class="page-item${i === current ? ' active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>`);
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>`);
                 }
 
                 let next = `<li class="page-item${current === total ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current + 1}">&raquo;</a>
-            </li>`;
+            <a class="page-link" href="#" data-page="${current + 1}">&raquo;</a>
+        </li>`;
                 $ul.append(next);
             }
 
-            // --- Initial Render ---
+            // Inisialisasi
             filterAndPaginate();
         });
     </script>
