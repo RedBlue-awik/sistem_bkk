@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 01 Sep 2025 pada 15.57
+-- Waktu pembuatan: 05 Sep 2025 pada 17.45
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -206,8 +206,7 @@ CREATE TABLE `online_users` (
 --
 
 INSERT INTO `online_users` (`id`, `id_user`, `last_activity`) VALUES
-(40, 38, '2025-08-26 14:49:33'),
-(49, 40, '2025-09-01 20:54:30');
+(40, 38, '2025-08-26 14:49:33');
 
 -- --------------------------------------------------------
 
