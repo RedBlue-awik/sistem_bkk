@@ -1,0 +1,13 @@
+{
+    "name": "dell/sistem_bkk",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Dell\\SistemBkk\\": "src/"
+        }
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^4.5"
+    }
+}
