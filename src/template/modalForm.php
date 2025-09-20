@@ -232,13 +232,13 @@
 
                 <form action="" method="post" class="needs-validation" novalidate>
                     <!-- Username Field -->
-                    <div class="input-group input-group-custom">
+                    <div class="input-group">
                         <div class="form-floating me-3">
                             <input id="lupaUsername" type="text" name="username" class="form-control form-control-custom" placeholder="Username" required />
                             <label for="lupaUsername"><i class="fas fa-user me-2"></i>Username</label>
                         </div>
 
-                        <div class="form-floating">
+                        <div class="form-floating input-group-custom">
                             <input id="nisn" type="text" name="nisn" class="form-control" placeholder="" required autocomplete="off" />
                             <label for="nisn" class="form-label"><i class="fas fa-rectangle-list me-1"></i> Nisn</label>
                         </div>
@@ -321,14 +321,15 @@
                                     <p class="text-muted text-center">Isi data diri Anda untuk mendaftar</p>
 
                                     <!-- Nama -->
-                                    <div class="input-group input-group-custom">
+                                    <div class="input-group">
                                         <div class="form-floating me-2">
                                             <input id="nama" type="text" name="nama" class="form-control form-control-custom" placeholder="Nama" required />
                                             <label for="nama"><i class="fas fa-user me-2"></i>Nama Lengkap</label>
                                         </div>
                                         <div class="form-floating">
-                                            <input id="nisn" type="text" name="nisn" class="form-control" placeholder="" required autocomplete="off" />
-                                            <label for="nisn" class="form-label"><i class="fas fa-rectangle-list me-1"></i> Nisn</label>
+                                            <input id="no_telp" type="text" name="no_telp" class="form-control" placeholder="" required autocomplete="off" />
+                                            <label for="no_telp" class="form-label"><i class="fas fa-rectangle-list me-1"></i> No Telpone</label>
+                                            <p class="text-danger" style="font-size: 10px;" >* Masukkan No Telpone Yang Aktif !</p>
                                         </div>
                                     </div>
 
@@ -456,6 +457,7 @@
         let nama = document.getElementById("nama").value;
         let jurusan = document.getElementById("jurusan").value;
         let tahun_lulus = document.getElementById("tahun_lulus").value;
+        let no_telp = document.getElementById("no_telp").value;
         let pw = document.getElementById("daftarpassword").value;
 
         // Buat pesan WhatsApp
@@ -463,12 +465,13 @@
 Nama saya ${nama}
 Jurusan saya ${jurusan.toUpperCase()}
 Tahun Lulus saya pada ${tahun_lulus}
+No Telpone saya ${no_telp}
 Dan Password yang saya inginkan : ${pw}
 Mohon Bantuannya ya,
 Terima kasih!`;
 
         // Buka WhatsApp
-        window.open(`https://wa.me/62891239213?text=${encodeURIComponent(pesan)}`, "_blank");
+        window.open(`https://wa.me/6285607406595?text=${encodeURIComponent(pesan)}`, "_blank");
 
         // Tutup modal setelah 200ms
         setTimeout(() => {
@@ -560,3 +563,21 @@ Terima kasih!`;
         });
     });
 </script>
+<!--begin::No Phone-->
+<script>
+    // Untuk semua input telepon (tambah & edit)
+    document.querySelectorAll('input[name="no_telp"]').forEach(function(el) {
+        el.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if ((i === 4 || (i > 4 && (i - 4) % 4 === 0)) && formattedValue.split('-').length <= 4) {
+                    formattedValue += '-';
+                }
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue;
+        });
+    });
+</script>
+<!--end::No Phone-->

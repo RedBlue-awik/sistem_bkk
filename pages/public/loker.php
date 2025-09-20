@@ -97,9 +97,16 @@ function getLoker()
 
     $loker = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Format gaji langsung
-        $angka = str_replace(['.', ','], ['', '.'], $row['gaji']);
-        $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($angka) . '/' . $row['kpn_gaji_diberi'];
+        $gaji_parts = explode('-', $row['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], $gaji_parts[0]) : 0;
+        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], $gaji_parts[1]) : $gaji_minimal;
+
+        // Format tampilan gaji
+        if ($gaji_minimal == $gaji_maksimal) {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . '/' . $row['kpn_gaji_diberi'];
+        } else {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . '/' . $row['kpn_gaji_diberi'];
+        }
 
         // Ubah persyaratan ke array
         if (is_string($row['persyaratan'])) {
@@ -615,7 +622,12 @@ include '../../src/template/headers.php'
                                 <input type="hidden" name="mata_uang" id="mata_uang1" value="Rp">
                                 <div class="form-floating">
                                     <input id="gaji" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" required autocomplete="off" />
-                                    <label for="gaji" class="form-label">Gaji</label>
+                                    <label for="gaji" class="form-label">Gaji Awal</label>
+                                </div>
+                                <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
+                                <div class="form-floating">
+                                    <input id="gaji_akhir" type="text" name="gaji_akhir" class="gaji_akhir form-control" placeholder="Masukkan Gaji Akhir" required autocomplete="off" />
+                                    <label for="gaji_akhir" class="form-label">Gaji Akhir</label>
                                 </div>
                                 <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi1" value="H">
                                 <button class="btn btn-hidden border border-top dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod1">/H</button>
@@ -625,7 +637,6 @@ include '../../src/template/headers.php'
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', 1)">/Bulan</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', 1)">/Tahun</a></li>
                                 </ul>
-                                <div class="input-group-text px-3"><span class="fas fa-money-bill-wave fa-lg"></span></div>
                             </div>
                             <div class="input-group my-3">
                                 <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
@@ -701,6 +712,12 @@ include '../../src/template/headers.php'
                                         <label for="judul" class="form-label">Judul</label>
                                     </div>
                                 </div>
+                                <!-- Pisahkan gaji menjadi minimal dan maksimal -->
+                                <?php
+                                $gaji_parts = explode('-', $loker['gaji']);
+                                $gaji_minimal = isset($gaji_parts[0]) ? $gaji_parts[0] : '';
+                                $gaji_maksimal = isset($gaji_parts[1]) ? $gaji_parts[1] : $gaji_minimal;
+                                ?>
                                 <div class="input-group my-3">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyType<?= $loker['id_lowongan']; ?>">
                                         <?= $loker['mata_uang']; ?>
@@ -713,8 +730,13 @@ include '../../src/template/headers.php'
                                     </ul>
                                     <input type="hidden" name="mata_uang" id="mata_uang<?= $loker['id_lowongan']; ?>" value="<?= $loker['mata_uang']; ?>">
                                     <div class="form-floating">
-                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" value="<?= $loker['gaji']; ?>" autocomplete="off" />
-                                        <label for="gaji<?= $loker['id_lowongan']; ?>" class="form-label">Gaji</label>
+                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji Awal" value="<?= $gaji_minimal; ?>" autocomplete="off" />
+                                        <label for="gaji<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Awal</label>
+                                    </div>
+                                    <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
+                                    <div class="form-floating">
+                                        <input id="gaji_akhir<?= $loker['id_lowongan']; ?>" type="text" name="gaji_akhir" class="gaji_akhir form-control" placeholder="Masukkan Gaji Akhir" value="<?= $gaji_maksimal; ?>" required autocomplete="off" />
+                                        <label for="gaji_akhir<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Akhir</label>
                                     </div>
                                     <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi<?= $loker['id_lowongan']; ?>" value="<?= $loker['kpn_gaji_diberi']; ?>">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod<?= $loker['id_lowongan']; ?>">
@@ -726,7 +748,6 @@ include '../../src/template/headers.php'
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', <?= $loker['id_lowongan']; ?>)">/Bulan</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', <?= $loker['id_lowongan']; ?>)">/Tahun</a></li>
                                     </ul>
-                                    <div class="input-group-text px-3"><span class="fas fa-money-bill-wave fa-lg"></span></div>
                                 </div>
                                 <div class="input-group my-3">
                                     <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
@@ -905,6 +926,21 @@ include '../../src/template/headers.php'
     <script>
         // Ambil semua elemen dengan class 'input-gaji'
         document.querySelectorAll('input[name="gaji"]').forEach(function(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                let formattedValue = '';
+
+                for (let i = value.length - 1; i >= 0; i--) {
+                    formattedValue = value[i] + formattedValue;
+                    if ((value.length - i) % 3 === 0 && i !== 0) {
+                        formattedValue = '.' + formattedValue;
+                    }
+                }
+
+                e.target.value = formattedValue;
+            });
+        });
+        document.querySelectorAll('input[name="gaji_akhir"]').forEach(function(input) {
             input.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/[^0-9]/g, '');
                 let formattedValue = '';

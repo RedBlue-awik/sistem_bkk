@@ -11,7 +11,7 @@
                      <a href="https://www.instagram.com/smk_mambaul_ihsan/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-instagram"></i></a>
                      <a href="https://www.youtube.com/@smkmambaulihsan4223/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-youtube"></i></a>
                      <a href="https://www.tiktok.com/@smksmambaul_ihsan" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><i class="fab fa-tiktok"></i></a>
-                     <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><img src="../../src/assets/img/logo.png" style="max-width: 50px;"></a>
+                     <a href="https://smkmambaulihsan.sch.id/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><img src="../../src/assets/img/logo.png" style="max-width: 50px;"></a>
                  </div>
              </div>
 
@@ -24,7 +24,7 @@
                  </div>
                  <div class="contact-info mb-2">
                      <i class="fas fa-phone me-2"></i>
-                     <span>08-- ---- ----</span>
+                     <span>0856-0740-6595</span>
                  </div>
                  <div class="contact-info mb-2">
                      <i class="fas fa-envelope me-2"></i>

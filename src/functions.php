@@ -577,7 +577,8 @@ function tambahLoker($data)
 	$judul = htmlspecialchars($data['judul']);
 	$deskripsi = htmlspecialchars($data['deskripsi']);
 	$persyaratan = htmlspecialchars(implode(",", $data['persyaratan'] ?? []));
-	$gaji = htmlspecialchars($data['gaji']);
+	$gajiawal = htmlspecialchars($data['gaji']);
+	$gajiakhir = htmlspecialchars($data['gaji_akhir']);
 	$mata_uang = htmlspecialchars($data['mata_uang']);
 	$kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
 	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
@@ -593,6 +594,8 @@ function tambahLoker($data)
 	if (empty($deskripsi)) {
 		$deskripsi = 'Tidak ada deskripsi';
 	}
+
+	$gaji = $gajiawal . ' - ' . $gajiakhir;
 
 	// Query untuk menambahkan loker
 	$queryLoker = "INSERT INTO lowongan (judul, deskripsi, persyaratan, mata_uang, gaji, kpn_gaji_diberi, tanggal_dibuka, tanggal_ditutup, id_perusahaan) 
@@ -664,7 +667,8 @@ function editLoker($data)
 	$deskripsi = htmlspecialchars($data['deskripsi']);
 	$mata_uang = htmlspecialchars($data['mata_uang']);
 	$kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
-	$gaji = htmlspecialchars($data['gaji']);
+	$gajiawal = htmlspecialchars($data['gaji']);
+	$gajiakhir = htmlspecialchars($data['gaji_akhir']);
 	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
 	$tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
 	$id_perusahaan = htmlspecialchars($data['perusahaan']);
@@ -672,6 +676,8 @@ function editLoker($data)
 	$persyaratan = isset($data['persyaratan']) && is_array($data['persyaratan'])
 		? implode(',', $data['persyaratan'])
 		: 'Tidak ada persyaratan';
+
+	$gaji = $gajiawal . ' - ' . $gajiakhir;
 
 	$query = "UPDATE lowongan SET 
               judul = '$judul', 
