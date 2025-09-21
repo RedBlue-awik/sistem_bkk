@@ -892,11 +892,11 @@ while ($row = mysqli_fetch_assoc($query)) {
                         </div>
                         <div class="contact-info mb-2">
                             <i class="fas fa-phone me-2"></i>
-                            <span>(0283) 123456</span>
+                            <span>0856-0740-6595</span>
                         </div>
                         <div class="contact-info mb-2">
                             <i class="fas fa-envelope me-2"></i>
-                            <span>smkppmi@gmail.com<</span>
+                            <span>smkppmi@gmail.com</span>
                         </div>
                     </div>
                 </div>

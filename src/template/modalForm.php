@@ -328,7 +328,7 @@
                                         </div>
                                         <div class="form-floating">
                                             <input id="no_telp" type="text" name="no_telp" class="form-control" placeholder="" required autocomplete="off" />
-                                            <label for="no_telp" class="form-label"><i class="fas fa-rectangle-list me-1"></i> No Telpone</label>
+                                            <label for="no_telp" class="form-label"><i class="fas fa-phone-volume me-1"></i> No Telpone</label>
                                             <p class="text-danger" style="font-size: 10px;" >* Masukkan No Telpone Yang Aktif !</p>
                                         </div>
                                     </div>
