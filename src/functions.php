@@ -1,6 +1,6 @@
 <?php
 
-$conn = mysqli_connect("localhost", "root", "", "sekolah_bkk");
+$conn = mysqli_connect("localhost", "root", "", "sekolah_bkk(demo)");
 
 //Start Function Data Admin
 
@@ -376,7 +376,7 @@ function tambahPerusahaan($data)
 			exit;
 		}
 	}
-	
+
 	$queryPerusahaan = "INSERT INTO perusahaan (nama_perusahaan, email, telepon, alamat, latitude, longitude, bidang_usaha, logo) VALUES('$nama', '$email', '$telepon', '$alamat', '$lat', '$lng', '$bidang_usaha', '$logo')";
 	mysqli_query($conn, $queryPerusahaan);
 
@@ -578,12 +578,23 @@ function tambahLoker($data)
 	$deskripsi = htmlspecialchars($data['deskripsi']);
 	$persyaratan = htmlspecialchars(implode(",", $data['persyaratan'] ?? []));
 	$gajiawal = htmlspecialchars($data['gaji']);
-	$gajiakhir = htmlspecialchars($data['gaji_akhir']);
 	$mata_uang = htmlspecialchars($data['mata_uang']);
 	$kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
 	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
 	$tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
 	$id_perusahaan = $data['perusahaan'];
+
+	// LOGIKA GABUNGAN GAJI - DIPERBAIKI
+	$gajiakhir = isset($data['gaji_akhir']) && !empty(trim($data['gaji_akhir']))
+		? htmlspecialchars($data['gaji_akhir'])
+		: '';
+
+	// Format gaji: jika ada gaji_akhir maka rentang, jika tidak maka satuan
+	if (!empty($gajiakhir)) {
+		$gaji = $gajiawal . ' - ' . $gajiakhir;
+	} else {
+		$gaji = $gajiawal; // Hanya gaji awal saja (satuan)
+	}
 
 	//Cek Persyaratan di isi atau tidak
 	if (empty($persyaratan) && !is_array($persyaratan)) {
@@ -595,11 +606,9 @@ function tambahLoker($data)
 		$deskripsi = 'Tidak ada deskripsi';
 	}
 
-	$gaji = $gajiawal . ' - ' . $gajiakhir;
-
 	// Query untuk menambahkan loker
 	$queryLoker = "INSERT INTO lowongan (judul, deskripsi, persyaratan, mata_uang, gaji, kpn_gaji_diberi, tanggal_dibuka, tanggal_ditutup, id_perusahaan) 
-				   VALUES('$judul', '$deskripsi', '$persyaratan', '$mata_uang', '$gaji', '$kpn_gaji_diberi', '$tanggal_dibuka', '$tanggal_ditutup', '$id_perusahaan')";
+                   VALUES('$judul', '$deskripsi', '$persyaratan', '$mata_uang', '$gaji', '$kpn_gaji_diberi', '$tanggal_dibuka', '$tanggal_ditutup', '$id_perusahaan')";
 	$result = mysqli_query($conn, $queryLoker);
 
 	// Pengumuman untuk semua user
@@ -657,7 +666,7 @@ function cekPengumumanLokerBerakhir()
 	}
 }
 
-// Function Logika Edit Perusahaan
+// Function Logika Edit Loker
 function editLoker($data)
 {
 	global $conn;
@@ -668,7 +677,6 @@ function editLoker($data)
 	$mata_uang = htmlspecialchars($data['mata_uang']);
 	$kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
 	$gajiawal = htmlspecialchars($data['gaji']);
-	$gajiakhir = htmlspecialchars($data['gaji_akhir']);
 	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
 	$tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
 	$id_perusahaan = htmlspecialchars($data['perusahaan']);
@@ -677,15 +685,25 @@ function editLoker($data)
 		? implode(',', $data['persyaratan'])
 		: 'Tidak ada persyaratan';
 
-	$gaji = $gajiawal . ' - ' . $gajiakhir;
+	// LOGIKA GABUNGAN GAJI - DIPERBAIKI
+	$gajiakhir = isset($data['gaji_akhir']) && !empty(trim($data['gaji_akhir']))
+		? htmlspecialchars($data['gaji_akhir'])
+		: '';
+
+	// Format gaji: jika ada gaji_akhir maka rentang, jika tidak maka satuan
+	if (!empty($gajiakhir)) {
+		$gaji = $gajiawal . ' - ' . $gajiakhir;
+	} else {
+		$gaji = $gajiawal; // Hanya gaji awal saja (satuan)
+	}
 
 	$query = "UPDATE lowongan SET 
               judul = '$judul', 
               deskripsi = '$deskripsi', 
               persyaratan = '$persyaratan',
-			  mata_uang = '$mata_uang', 
+              mata_uang = '$mata_uang', 
               gaji = '$gaji',
-			  kpn_gaji_diberi = '$kpn_gaji_diberi', 
+              kpn_gaji_diberi = '$kpn_gaji_diberi', 
               tanggal_dibuka = '$tanggal_dibuka', 
               tanggal_ditutup = '$tanggal_ditutup', 
               id_perusahaan = '$id_perusahaan' 
@@ -694,6 +712,7 @@ function editLoker($data)
 
 	return mysqli_affected_rows($conn);
 }
+
 // Function Logika Hapus loker
 function hapusLoker($id)
 {

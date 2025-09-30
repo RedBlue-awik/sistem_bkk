@@ -2,16 +2,6 @@
 // Syarat untuk menggunakan session
 session_start();
 
-// Cek apakah sudah ada session login, jika sudah kembalikan
-// if (!isset($_SESSION['id_pengguna'])) {
-//     echo "
-//     <script>
-//     document.location.href = '../../index.php';
-//     </script>
-//     ";
-// }
-
-// Ambil kategori filter dari session
 // Ambil kategori filter dari session
 $kategoriFilter = isset($_SESSION['kategori_filter']) ? $_SESSION['kategori_filter'] : '';
 
@@ -21,9 +11,7 @@ include '../../src/controller/lupapw.php';
 
 // Cek apakah tombol tambah di klik
 if (isset($_POST['tambah'])) {
-
     if (tambahLoker($_POST) > 0) {
-        // SweetAlert untuk berhasil
         echo "
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -54,7 +42,6 @@ if (isset($_POST['tambah'])) {
 
 // Cek apakah tombol edit di klik
 if (isset($_POST['edit'])) {
-
     if (editLoker($_POST) !== false) {
         echo "
         <script>
@@ -83,6 +70,7 @@ if (isset($_POST['edit'])) {
         </script>";
     }
 }
+
 function getLoker()
 {
     global $conn;
@@ -98,8 +86,8 @@ function getLoker()
     $loker = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $gaji_parts = explode('-', $row['gaji']);
-        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], $gaji_parts[0]) : 0;
-        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], $gaji_parts[1]) : $gaji_minimal;
+        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[0])) : 0;
+        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[1])) : $gaji_minimal;
 
         // Format tampilan gaji
         if ($gaji_minimal == $gaji_maksimal) {
@@ -118,7 +106,6 @@ function getLoker()
 
     return $loker;
 }
-
 
 $daftarperusahaan = getPerusahaan();
 
@@ -161,9 +148,7 @@ $searchFromIndex = isset($_SESSION['search_from_index']) ? $_SESSION['search_fro
 if (isset($_SESSION['search_from_index'])) {
     unset($_SESSION['search_from_index']);
 }
-
 ?>
-
 <!doctype html>
 <html lang="en">
 <!--begin::Head-->
@@ -185,7 +170,7 @@ include '../../src/template/headers.php'
         font-family: "Poppins", sans-serif;
     }
 
-    /*K onten centering: no offset on mobile, offset on desktop */
+    /* Konten centering: no offset on mobile, offset on desktop */
     .content {
         padding: 1.5rem;
     }
@@ -211,8 +196,6 @@ include '../../src/template/headers.php'
         .mapsLink {
             font-size: 13px;
         }
-
-
     }
 
     @media (min-width: 768px) {
@@ -327,25 +310,18 @@ include '../../src/template/headers.php'
                 </ul>
                 <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto">
-
                     <?php if (isset($_SESSION['level'])) : ?>
                         <!--begin::User Menu Dropdown-->
                         <li class="nav-item dropdown user-menu">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <img
-                                    src="../../src/assets/img/logo.png"
-                                    class="user-image rounded-circle shadow"
-                                    alt="User Image" />
+                                <img src="../../src/assets/img/logo.png" class="user-image rounded-circle shadow" alt="User Image" />
                                 <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                                 <!--begin::User Image-->
                                 <li class="user-header bg-secondary-subtle">
                                     <?php if ($_SESSION["gambar"] !== "") : ?>
-                                        <img
-                                            src="../../dist/assets/img/user2-160x160.jpg"
-                                            class="rounded-circle shadow"
-                                            alt="User Image" />
+                                        <img src="../../dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image" />
                                     <?php endif; ?>
                                     <p class="fw-semibold text-light">Nama</p>
                                     <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
@@ -356,8 +332,12 @@ include '../../src/template/headers.php'
                                 <!--end::User Image-->
                                 <!--begin::Menu Footer-->
                                 <li class="user-footer">
-                                    <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman"><i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span></a>
-                                    <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )"><i class="fas fa-arrow-right-from-bracket"></i></a>
+                                    <a href="./pengumuman-all.php" class="btn btn-default btn-flat" data-bs-trigger="hover" data-bs-placement="right" data-bs-custom-class="custom-tooltip-Bell" data-bs-title="Pengumuman">
+                                        <i class="bi bi-bell"></i><span class="badge bg-danger float-end d-none badgePengumuman">0</span>
+                                    </a>
+                                    <a href="../../logout.php" class="btn btn-default btn-flat float-end btn-logout" data-bs-trigger="hover" data-bs-placement="left" data-bs-custom-class="custom-tooltip-logout" data-bs-title="LogOut ( Keluar )">
+                                        <i class="fas fa-arrow-right-from-bracket"></i>
+                                    </a>
                                 </li>
                                 <!--end::Menu Footer-->
                             </ul>
@@ -365,10 +345,13 @@ include '../../src/template/headers.php'
                         <!--end::User Menu Dropdown-->
                     <?php else: ?>
                         <ul class="navbar-nav ms-auto">
-
                             <!--begin::User Menu Dropdown-->
-                            <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-pen-to-square me-2"></i>Daftar</button>
-                            <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</button>
+                            <button data-bs-toggle="modal" data-bs-target="#Modaldaftar" class="btn btn-outline-light ps-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;">
+                                <i class="fa-solid fa-pen-to-square me-2"></i>Daftar
+                            </button>
+                            <button data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-outline-light ps-2 mx-2 fw-medium d-flex align-items-center justify-content-center text-center" style="height: 30px; font-size: 13px;">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+                            </button>
                             <!--end::User Menu Dropdown-->
                         </ul>
                     <?php endif; ?>
@@ -441,14 +424,11 @@ include '../../src/template/headers.php'
                             <?php endif; ?>
 
                             <!-- Daftar Loker -->
-                            <?php
-                            foreach ($daftarLoker as $loker) :
+                            <?php foreach ($daftarLoker as $loker) :
                                 $alamat = $loker['alamat'];
-                            ?>
-                                <?php
                                 $isTutup = strtotime($loker['tanggal_ditutup']) < time();
                                 $isBelumBuka = strtotime($loker['tanggal_dibuka']) > time();
-                                ?>
+                            ?>
                                 <div class="col-sm-6 col-xl-4 loker-card"
                                     data-judul="<?= htmlspecialchars(strtolower($loker['judul'])) ?>"
                                     data-perusahaan="<?= htmlspecialchars(strtolower($loker['nama_perusahaan'])) ?>"
@@ -461,55 +441,69 @@ include '../../src/template/headers.php'
                                                 </span>
                                                 <span class="text-muted"><strong><?= $loker['gaji_full']; ?></strong></span>
                                             </div>
-                                            <div class="mb-3 mt-n1"><span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span></div>
+                                            <div class="mb-3 mt-n1">
+                                                <span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span>
+                                            </div>
                                             <ul class="list-unstyled flex-grow-1">
-                                                <li class="mb-2"><strong>Nama Perusahaan:</strong><br><span class="badge bg-primary"> <?= $loker['nama_perusahaan']; ?> </span></li>
-                                                <li class="mb-2"><strong>Persyaratan:</strong>
-                                                    <br>
+                                                <li class="mb-2">
+                                                    <strong>Nama Perusahaan:</strong><br>
+                                                    <span class="badge bg-primary"> <?= $loker['nama_perusahaan']; ?> </span>
+                                                </li>
+                                                <li class="mb-2">
+                                                    <strong>Persyaratan:</strong><br>
                                                     <?php foreach ($loker['persyaratan'] as $persyaratan): ?>
                                                         <span class="badge text-bg-warning"><?= htmlspecialchars($persyaratan); ?></span>
                                                     <?php endforeach; ?>
                                                 </li>
-                                                <li class="mb-2"><strong>Deskripsi:</strong><br> <?= $loker['deskripsi']; ?></li>
+                                                <li class="mb-2">
+                                                    <strong>Deskripsi:</strong><br> <?= $loker['deskripsi']; ?>
+                                                </li>
                                             </ul>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="d-flex justify-content-start align-items-center">
                                                     <img src="../../src/assets/img/perusahaan/logo/<?= $loker['logo']; ?>" alt="Logo Perusahaan" class="img-thumbnail" style="max-width: 40px; max-height: 40px;">
                                                     <div class="mt-1 ms-2 d-flex flex-column">
-                                                        <span class="mb-1 mapsLink"><?= '<a class="linkMaps icon-link icon-link-hover"  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?></span>
+                                                        <span class="mb-1 mapsLink">
+                                                            <?= '<a class="linkMaps icon-link icon-link-hover" href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?>
+                                                        </span>
                                                         <div class="d-flex flex-column">
-                                                            <?php
-                                                            if ($isTutup) {
+                                                            <?php if ($isTutup) : ?>
+                                                                <?php
                                                                 $tanggal_tutup = strtotime($loker['tanggal_ditutup']);
                                                                 $hari_ini = strtotime(date('Y-m-d'));
                                                                 $selisih_hari = ceil(($hari_ini - $tanggal_tutup) / 86400);
-                                                            ?>
+                                                                ?>
                                                                 <span class="text-muted" style="font-size: 12px;">
                                                                     <strong>Sudah di Tutup <?= $selisih_hari ?> Hari Lalu</strong>
                                                                 </span>
-                                                            <?php } elseif ($isBelumBuka) {
+                                                            <?php elseif ($isBelumBuka) : ?>
+                                                                <?php
                                                                 $tanggal_dibuka = strtotime($loker['tanggal_dibuka']);
                                                                 $hari_ini = strtotime(date('Y-m-d'));
                                                                 $selisih_hari = ceil(($tanggal_dibuka - $hari_ini) / 86400);
-                                                            ?>
+                                                                ?>
                                                                 <span class="text-muted" style="font-size: 12px;">
                                                                     <strong>Dibuka <?= $selisih_hari ?> Hari Lagi</strong>
                                                                 </span>
-                                                            <?php } else { ?>
+                                                            <?php else : ?>
                                                                 <span class="time" style="font-size: 10px;">
                                                                     <?= $loker['tanggal_dibuka'] ?> -- <?= $loker['tanggal_ditutup'] ?>
                                                                 </span>
-                                                            <?php } ?>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') { ?>
-                                                        <span class="btn btn-group me-n3">
-                                                            <a href="" class="btn btn-sm btn-outline-success mb-1 me-1" data-bs-toggle="modal" data-bs-target="#modalEdit<?= $loker['id_lowongan']; ?>" data-bs-trigger="hover" data-bs-placement="top" data-bs-custom-class="custom-tooltip-Edit" data-bs-title="Edit ( Ubah )"><i class="fas fa-gear"></i></a>
-                                                            <a href="../../src/config/hapus-dataloker.php?id=<?= $loker['id_lowongan'] ?>" class="btn btn-sm btn-outline-danger btn-hapus mb-1 ms-1" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-custom-class="custom-tooltip-Delete" data-bs-title="Delete ( Hapus )"><i class="fas fa-trash"></i></a>
+                                                    <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
+                                                        <span class="d-flex p-3 me-n3">
+                                                            <a href="" class="btn btn-sm btn-outline-success mb-1 me-1" data-bs-toggle="modal" data-bs-target="#modalEdit<?= $loker['id_lowongan']; ?>" data-bs-trigger="hover" data-bs-placement="top" data-bs-custom-class="custom-tooltip-Edit" data-bs-title="Edit ( Ubah )">
+                                                                <i class="fas fa-gear"></i>
+                                                            </a>
+                                                            <a href="../../src/config/hapus-dataloker.php?id=<?= $loker['id_lowongan'] ?>" class="btn btn-sm btn-outline-danger btn-hapus mb-1 ms-1" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-custom-class="custom-tooltip-Delete" data-bs-title="Delete ( Hapus )">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
                                                         </span>
-                                                    <?php } else if (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') { ?>
+                                                    <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') : ?>
                                                         <?php if ($isTutup) : ?>
                                                             <a href="" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                         <?php elseif ($isBelumBuka) : ?>
@@ -517,9 +511,9 @@ include '../../src/template/headers.php'
                                                         <?php else : ?>
                                                             <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
                                                         <?php endif; ?>
-                                                    <?php } else { ?>
+                                                    <?php else : ?>
                                                         <a href="" data-bs-toggle="modal" data-bs-target="#Modallogin" class="btn btn-sm px-4 btn-outline-primary">Login</a>
-                                                    <?php } ?>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -545,9 +539,6 @@ include '../../src/template/headers.php'
                         <!--end::Pagination Controls-->
                     </div>
                     <!--end::Row-->
-                    <!--begin::Row-->
-
-                    <!-- /.row (main row) -->
                 </div>
                 <!--end::Container-->
             </div>
@@ -563,7 +554,6 @@ include '../../src/template/headers.php'
     <?php include '../../src/template/modalForm.php' ?>
 
     <?php foreach ($daftarLoker as $loker) : ?>
-
         <!--begin::Modal Syarat -->
         <div class="modal fade" id="modalSyarat<?= $loker['id_lowongan']; ?>" tabindex="-1">
             <div class="modal-dialog">
@@ -589,11 +579,9 @@ include '../../src/template/headers.php'
             </div>
         </div>
         <!-- End::Modal Syarat -->
-
     <?php endforeach; ?>
 
     <!--begin::Modal Tambah Data-->
-    <!-- Modal Tambah -->
     <div class="modal fade" id="modalLoker" tabindex="-1" aria-labelledby="modalLokerLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -601,7 +589,7 @@ include '../../src/template/headers.php'
                     <h1 class="modal-title fs-5" id="modalLokerLabel">Tambah Lowongan Kerja</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="" method="post" class="needs-validation" novalidate>
+                <form action="" method="post" class="needs-validation" novalidate onsubmit="return validateGajiForm()">
                     <div class="modal-body">
                         <div class="row">
                             <div class="input-group my-3">
@@ -622,21 +610,29 @@ include '../../src/template/headers.php'
                                 <input type="hidden" name="mata_uang" id="mata_uang1" value="Rp">
                                 <div class="form-floating">
                                     <input id="gaji" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" required autocomplete="off" />
-                                    <label for="gaji" class="form-label">Gaji Awal</label>
+                                    <label for="gaji" class="form-label">Gaji</label>
                                 </div>
-                                <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
-                                <div class="form-floating">
-                                    <input id="gaji_akhir" type="text" name="gaji_akhir" class="gaji_akhir form-control" placeholder="Masukkan Gaji Akhir" required autocomplete="off" />
-                                    <label for="gaji_akhir" class="form-label">Gaji Akhir</label>
+                                <div id="gajiAkhirContainer" style="width: 12rem; display: none;">
+                                    <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
+                                    <div class="form-floating">
+                                        <input id="gaji_akhir" type="text" name="gaji_akhir" class="gaji_akhir form-control rounded-0" placeholder="Masukkan Gaji Akhir" autocomplete="off" />
+                                        <label for="gaji_akhir" class="form-label">Gaji Akhir</label>
+                                    </div>
                                 </div>
-                                <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi1" value="H">
-                                <button class="btn btn-hidden border border-top dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod1">/H</button>
+                                <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi1" value="B">
+                                <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod1">/B</button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('H', 1)">/Hari</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('M', 1)">/Minggu</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', 1)">/Bulan</a></li>
                                     <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', 1)">/Tahun</a></li>
                                 </ul>
+                            </div>
+                            <div class="form-check ms-3 mt-2">
+                                <input class="form-check-input" type="checkbox" id="rentangGaji" onchange="toggleGajiAkhir()">
+                                <label class="form-check-label" for="rentangGaji">
+                                    Gaji Rentang
+                                </label>
                             </div>
                             <div class="input-group my-3">
                                 <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
@@ -657,7 +653,6 @@ include '../../src/template/headers.php'
                                     <div id="persyaratan-list">
                                         <!-- Input Persyaratan akan muncul di sini -->
                                     </div>
-
                                     <!-- Tombol untuk menambah persyaratan -->
                                     <button type="button" class="btn btn-primary" id="add-btn">+ Tambah Persyaratan</button>
                                     <br>
@@ -694,6 +689,12 @@ include '../../src/template/headers.php'
 
     <!-- Modal Edit -->
     <?php foreach ($daftarLoker as $loker) : ?>
+        <?php
+        $gaji_parts = explode('-', $loker['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? trim($gaji_parts[0]) : '';
+        $gaji_maksimal = isset($gaji_parts[1]) ? trim($gaji_parts[1]) : '';
+        $isRentang = !empty($gaji_maksimal) && $gaji_maksimal !== $gaji_minimal;
+        ?>
         <div class="modal fade" id="modalEdit<?= $loker['id_lowongan']; ?>" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -701,7 +702,7 @@ include '../../src/template/headers.php'
                         <h1 class="modal-title fs-5" id="modalEditLabel">Edit Lowongan Kerja</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="" method="post" class="needs-validation" novalidate>
+                    <form action="" method="post" class="needs-validation" novalidate onsubmit="return validateGajiFormEdit(<?= $loker['id_lowongan']; ?>)">
                         <input type="hidden" name="id_lowongan" value="<?= $loker['id_lowongan']; ?>">
                         <div class="modal-body">
                             <div class="row">
@@ -712,12 +713,6 @@ include '../../src/template/headers.php'
                                         <label for="judul" class="form-label">Judul</label>
                                     </div>
                                 </div>
-                                <!-- Pisahkan gaji menjadi minimal dan maksimal -->
-                                <?php
-                                $gaji_parts = explode('-', $loker['gaji']);
-                                $gaji_minimal = isset($gaji_parts[0]) ? $gaji_parts[0] : '';
-                                $gaji_maksimal = isset($gaji_parts[1]) ? $gaji_parts[1] : $gaji_minimal;
-                                ?>
                                 <div class="input-group my-3">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyType<?= $loker['id_lowongan']; ?>">
                                         <?= $loker['mata_uang']; ?>
@@ -730,13 +725,15 @@ include '../../src/template/headers.php'
                                     </ul>
                                     <input type="hidden" name="mata_uang" id="mata_uang<?= $loker['id_lowongan']; ?>" value="<?= $loker['mata_uang']; ?>">
                                     <div class="form-floating">
-                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji Awal" value="<?= $gaji_minimal; ?>" autocomplete="off" />
-                                        <label for="gaji<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Awal</label>
+                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" value="<?= $gaji_minimal; ?>" autocomplete="off" />
+                                        <label for="gaji<?= $loker['id_lowongan']; ?>" class="form-label">Gaji</label>
                                     </div>
-                                    <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
-                                    <div class="form-floating">
-                                        <input id="gaji_akhir<?= $loker['id_lowongan']; ?>" type="text" name="gaji_akhir" class="gaji_akhir form-control" placeholder="Masukkan Gaji Akhir" value="<?= $gaji_maksimal; ?>" required autocomplete="off" />
-                                        <label for="gaji_akhir<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Akhir</label>
+                                    <div id="gajiAkhirContainer<?= $loker['id_lowongan']; ?>" style="width: 12rem; display: <?= $isRentang ? 'flex' : 'none'; ?>;">
+                                        <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
+                                        <div class="form-floating">
+                                            <input id="gaji_akhir<?= $loker['id_lowongan']; ?>" type="text" name="gaji_akhir" class="gaji_akhir form-control rounded-0" placeholder="Masukkan Gaji Akhir" value="<?= $gaji_maksimal; ?>" autocomplete="off" />
+                                            <label for="gaji_akhir<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Akhir</label>
+                                        </div>
                                     </div>
                                     <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi<?= $loker['id_lowongan']; ?>" value="<?= $loker['kpn_gaji_diberi']; ?>">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod<?= $loker['id_lowongan']; ?>">
@@ -748,6 +745,12 @@ include '../../src/template/headers.php'
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', <?= $loker['id_lowongan']; ?>)">/Bulan</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', <?= $loker['id_lowongan']; ?>)">/Tahun</a></li>
                                     </ul>
+                                </div>
+                                <div class="form-check ms-3 mt-2">
+                                    <input class="form-check-input" type="checkbox" id="rentangGaji<?= $loker['id_lowongan']; ?>" onchange="toggleGajiAkhir(<?= $loker['id_lowongan']; ?>)" <?= $isRentang ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="rentangGaji<?= $loker['id_lowongan']; ?>">
+                                        Gaji Rentang
+                                    </label>
                                 </div>
                                 <div class="input-group my-3">
                                     <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
@@ -804,43 +807,37 @@ include '../../src/template/headers.php'
         </div>
     <?php endforeach; ?>
     <!-- End::Modal Edit Data -->
-    <!--begin::Script-->
 
-    <?php
-    include '../../src/template/footer.php';
-    ?>
+    <!--begin::Script-->
+    <?php include '../../src/template/footer.php'; ?>
 
     <!-- OPTIONAL SCRIPTS -->
-
     <!--begin::Validation-->
     <script>
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
         (() => {
             'use strict'
-
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
             const forms = document.querySelectorAll('.needs-validation')
-
-            // Loop over them and prevent submission
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', event => {
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
-
                     form.classList.add('was-validated')
                 }, false)
             })
         })()
 
-        // Reset form validation when modal is closed
         const modalTambah = document.getElementById('modalLoker');
-
         modalTambah.addEventListener('hidden.bs.modal', function() {
             const form = modalTambah.querySelector('form');
-            form.classList.remove('was-validated'); // Hapus kelas validasi
-            form.reset(); // Reset semua input di dalam form
+            form.classList.remove('was-validated');
+            form.reset();
+            // Reset gaji akhir container
+            const gajiAkhirContainer = document.getElementById('gajiAkhirContainer');
+            gajiAkhirContainer.style.display = 'none';
+            const rentangGaji = document.getElementById('rentangGaji');
+            rentangGaji.checked = false;
         });
     </script>
     <!--end::Validation-->
@@ -849,17 +846,12 @@ include '../../src/template/headers.php'
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const modals = document.querySelectorAll('.modalLoker');
-
             modals.forEach(modal => {
                 modal.addEventListener('hidden.bs.modal', function() {
-                    // Reset form di dalam modal
                     const form = modal.querySelector('form');
                     if (form) {
                         form.reset();
                     }
-
-                    // Kalau kamu pakai value dari PHP, perlu di-*refresh* datanya via AJAX atau reload
-                    // Tapi kalau isiannya dari value HTML langsung, cukup pakai form.reset()
                 });
             });
         });
@@ -867,33 +859,20 @@ include '../../src/template/headers.php'
     <!-- end::Form -->
 
     <!-- Script Persyaratan -->
-    <!-- Link ke JS Bootstrap dan jQuery -->
     <script>
-        // Fungsi untuk menambah persyaratan
         document.getElementById('add-btn').addEventListener('click', function() {
             const persyaratanList = document.getElementById('persyaratan-list');
-
-            // Hitung jumlah persyaratan yang sudah ada
-            const persyaratanCount = persyaratanList.children.length + 1;
-
-            // Membuat elemen baru untuk input
             const newPersyaratan = document.createElement('div');
             newPersyaratan.classList.add('input-container');
-
-
-            // HTML untuk input persyaratan baru
             newPersyaratan.innerHTML = `
-            <div class="input-group">
-                <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
-                <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
-            </div><br>
+                <div class="input-group">
+                    <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
+                    <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
+                </div><br>
             `;
-
-            // Menambahkan input baru ke list
             persyaratanList.appendChild(newPersyaratan);
         });
 
-        // Fungsi untuk menghapus input persyaratan
         function removePersyaratan(button) {
             const persyaratanContainer = button.parentElement.parentElement;
             persyaratanContainer.remove();
@@ -902,56 +881,44 @@ include '../../src/template/headers.php'
         function addPersyaratan(id) {
             const list = document.getElementById(`persyaratan-list-${id}`);
             const index = list.children.length;
-
             const newInput = document.createElement('div');
             newInput.classList.add('input-group', 'mb-2');
             newInput.id = `persyaratan-item-${index}`;
             newInput.innerHTML = `
-        <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
-        <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
-    `;
-
+                <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
+                <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
+            `;
             list.appendChild(newInput);
-        }
-
-        function removePersyaratan(button) {
-            // Cari parent .input-container (tambah) atau .input-group (edit)
-            let container = button.closest('.input-container') || button.closest('.input-group');
-            if (container) container.remove();
         }
     </script>
     <!-- End Sript Persyaratan -->
 
     <!--begin::Nominal Gaji-->
     <script>
-        // Ambil semua elemen dengan class 'input-gaji'
         document.querySelectorAll('input[name="gaji"]').forEach(function(input) {
             input.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/[^0-9]/g, '');
                 let formattedValue = '';
-
                 for (let i = value.length - 1; i >= 0; i--) {
                     formattedValue = value[i] + formattedValue;
                     if ((value.length - i) % 3 === 0 && i !== 0) {
                         formattedValue = '.' + formattedValue;
                     }
                 }
-
                 e.target.value = formattedValue;
             });
         });
+
         document.querySelectorAll('input[name="gaji_akhir"]').forEach(function(input) {
             input.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/[^0-9]/g, '');
                 let formattedValue = '';
-
                 for (let i = value.length - 1; i >= 0; i--) {
                     formattedValue = value[i] + formattedValue;
                     if ((value.length - i) % 3 === 0 && i !== 0) {
                         formattedValue = '.' + formattedValue;
                     }
                 }
-
                 e.target.value = formattedValue;
             });
         });
@@ -973,8 +940,8 @@ include '../../src/template/headers.php'
     <!-- Begin::Currency Dropdown -->
     <script>
         function setkpn_gaji_diberi(value, id) {
-            document.getElementById('currencyPeriod' + id).textContent = '/' + value.charAt(0).toUpperCase(); // Ubah tampilan di tombol
-            document.getElementById('kpn_gaji_diberi' + id).value = value; // Simpan value asli
+            document.getElementById('currencyPeriod' + id).textContent = '/' + value.charAt(0).toUpperCase();
+            document.getElementById('kpn_gaji_diberi' + id).value = value;
         }
 
         function setMataUang(value, id) {
@@ -982,16 +949,50 @@ include '../../src/template/headers.php'
             document.getElementById('mata_uang' + id).value = value;
         }
     </script>
-
     <!-- End::Currency Dropdown -->
+
+    <!-- Begin::Toggle Gaji Akhir -->
+    <script>
+        function toggleGajiAkhir(id = null) {
+            const containerId = id ? `gajiAkhirContainer${id}` : 'gajiAkhirContainer';
+            const container = document.getElementById(containerId);
+            const checkboxId = id ? `rentangGaji${id}` : 'rentangGaji';
+            const checkbox = document.getElementById(checkboxId);
+
+            if (checkbox.checked) {
+                container.style.display = 'flex';
+                // Set required attribute jika checkbox dicentang
+                const gajiAkhirInput = container.querySelector('input[name="gaji_akhir"]');
+                if (gajiAkhirInput) {
+                    gajiAkhirInput.required = true;
+                }
+            } else {
+                container.style.display = 'none';
+                // Hapus required attribute dan clear value jika checkbox tidak dicentang
+                const gajiAkhirInput = container.querySelector('input[name="gaji_akhir"]');
+                if (gajiAkhirInput) {
+                    gajiAkhirInput.required = false;
+                    gajiAkhirInput.value = '';
+                }
+            }
+        }
+
+        // Fungsi untuk inisialisasi toggle saat modal dibuka
+        function initGajiToggle(id = null) {
+            const checkboxId = id ? `rentangGaji${id}` : 'rentangGaji';
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                toggleGajiAkhir(id);
+            }
+        }
+    </script>
+    <!-- End::Toggle Gaji Akhir -->
 
     <!-- Begin::Details -->
     <script>
         document.querySelectorAll('.card-click').forEach(card => {
             card.addEventListener('click', function(e) {
-                // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
                 if (e.target.closest('a')) return;
-
                 const id = this.getAttribute('data-id');
                 window.open(`./detail_loker.php?id_lowongan=${id}`);
             });
@@ -999,57 +1000,98 @@ include '../../src/template/headers.php'
     </script>
     <!-- End::Details -->
 
+    <!-- Validasi Form Gaji -->
+    <script>
+        function validateGajiForm() {
+            const rentangGajiChecked = document.getElementById('rentangGaji').checked;
+            const gajiAkhirInput = document.getElementById('gaji_akhir');
+
+            if (rentangGajiChecked && (!gajiAkhirInput.value || gajiAkhirInput.value.trim() === '')) {
+                alert('Harap isi gaji akhir jika memilih rentang gaji');
+                gajiAkhirInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateGajiFormEdit(id) {
+            const rentangGajiChecked = document.getElementById('rentangGaji' + id).checked;
+            const gajiAkhirInput = document.getElementById('gaji_akhir' + id);
+
+            if (rentangGajiChecked && (!gajiAkhirInput.value || gajiAkhirInput.value.trim() === '')) {
+                alert('Harap isi gaji akhir jika memilih rentang gaji');
+                gajiAkhirInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        // Inisialisasi saat modal dibuka
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalLoker = document.getElementById('modalLoker');
+            if (modalLoker) {
+                modalLoker.addEventListener('shown.bs.modal', function() {
+                    initGajiToggle();
+                });
+            }
+
+            // Untuk modal edit
+            const modalsEdit = document.querySelectorAll('[id^="modalEdit"]');
+            modalsEdit.forEach(modal => {
+                modal.addEventListener('shown.bs.modal', function() {
+                    const id = this.id.replace('modalEdit', '');
+                    initGajiToggle(id);
+                });
+            });
+        });
+    </script>
+
     <script>
         $(function() {
-            // State management
             let kategoriFilter = "<?= htmlspecialchars($kategoriFilter) ?>";
             let searchFromIndex = "<?= htmlspecialchars($searchFromIndex) ?>";
 
-            // Hapus session kategori setelah diambil
             if (kategoriFilter) {
                 $.post('../../src/config/clear_kategori.php', function(response) {
                     console.log('Session cleared:', response);
                 }, 'json');
             }
 
-            // Tambahkan indikator filter kategori
             function updateKategoriIndicator() {
                 if (kategoriFilter) {
                     $('#kategoriIndicator').html(`
-                    <div class="alert alert-info d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-filter me-2"></i>
-                            Filter Kategori: <strong>${kategoriFilter}</strong>
+                        <div class="alert alert-info d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="fas fa-filter me-2"></i>
+                                Filter Kategori: <strong>${kategoriFilter}</strong>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearKategoriFilter()">
+                                <i class="fas fa-times me-1"></i> Hapus Filter
+                            </button>
                         </div>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="clearKategoriFilter()">
-                            <i class="fas fa-times me-1"></i> Hapus Filter
-                        </button>
-                    </div>
-                `).show();
+                    `).show();
                 } else {
                     $('#kategoriIndicator').hide();
                 }
             }
 
-            // Inisialisasi indikator
             updateKategoriIndicator();
 
-            // Isi input pencarian jika ada dari session
             if (searchFromIndex) {
                 $('#searchLoker').val(searchFromIndex);
-                // Hapus session setelah digunakan
                 $.post('', {
                     clear_search_session: 1
                 });
             }
 
-            // Event listeners
             $('#searchLoker').on('input search', function() {
                 filterAndPaginate();
             });
 
             $('#perPage').on('change', function() {
-                window.currentPage = 1; // Reset ke halaman pertama
+                window.currentPage = 1;
                 filterAndPaginate();
             });
 
@@ -1064,7 +1106,6 @@ include '../../src/template/headers.php'
 
             window.currentPage = 1;
 
-            // Fungsi filter and paginate
             function filterAndPaginate() {
                 let search = $('#searchLoker').val().toLowerCase();
                 let perPage = parseInt($('#perPage').val());
@@ -1072,62 +1113,38 @@ include '../../src/template/headers.php'
                 let $adminCard = $('#lokerCards .loker-card-admin');
                 let filtered = [];
 
-                // Debug: Tampilkan nilai filter di console
-                console.log('Kategori Filter:', kategoriFilter);
-                console.log('Search Term:', search);
-
                 $cards.each(function() {
                     let $el = $(this);
                     let judul = $el.data('judul');
                     let perusahaan = $el.data('perusahaan');
                     let bidang = $el.data('bidang');
 
-                    // Debug: Tampilkan data setiap card
-                    console.log('Card Data:', {
-                        judul: judul,
-                        perusahaan: perusahaan,
-                        bidang: bidang
-                    });
-
-                    // Filter berdasarkan kategori (jika ada)
                     let matchKategori = true;
                     if (kategoriFilter) {
                         matchKategori = bidang && bidang.includes(kategoriFilter.toLowerCase());
-                        console.log('Match Kategori:', matchKategori);
                     }
 
-                    // Filter berdasarkan search
                     let matchSearch = search === '' ||
                         (judul && judul.includes(search)) ||
                         (perusahaan && perusahaan.includes(search)) ||
                         (bidang && bidang.includes(search));
-                    console.log('Match Search:', matchSearch);
 
-                    // Logika filter yang diperbaiki:
                     if (search !== '') {
-                        // Saat ada pencarian, abaikan filter kategori
                         if (matchSearch) {
                             filtered.push($el);
-                            console.log('Card ditambahkan ke filtered (pencarian aktif)');
                         }
                     } else {
-                        // Saat tidak ada pencarian, gunakan filter kategori jika ada
                         if (kategoriFilter) {
                             if (matchKategori && matchSearch) {
                                 filtered.push($el);
-                                console.log('Card ditambahkan ke filtered (filter kategori aktif)');
                             }
                         } else {
-                            // Jika tidak ada filter kategori dan tidak ada pencarian, tampilkan semua
                             if (matchSearch) {
                                 filtered.push($el);
-                                console.log('Card ditambahkan ke filtered (tampilkan semua)');
                             }
                         }
                     }
                 });
-
-                console.log('Total filtered cards:', filtered.length);
 
                 let total = filtered.length;
                 let totalPages = Math.ceil(total / perPage) || 1;
@@ -1152,24 +1169,23 @@ include '../../src/template/headers.php'
                 $ul.empty();
                 if (total <= 1) return;
                 let prev = `<li class="page-item${current === 1 ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current - 1}" tabindex="-1">&laquo;</a>
-            </li>`;
+                    <a class="page-link" href="#" data-page="${current - 1}" tabindex="-1">&laquo;</a>
+                </li>`;
                 $ul.append(prev);
                 let start = Math.max(1, current - 2);
                 let end = Math.min(total, start + 4);
                 if (end - start < 4) start = Math.max(1, end - 4);
                 for (let i = start; i <= end; i++) {
                     $ul.append(`<li class="page-item${i === current ? ' active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>`);
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`);
                 }
                 let next = `<li class="page-item${current === total ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current + 1}">&raquo;</a>
-            </li>`;
+                    <a class="page-link" href="#" data-page="${current + 1}">&raquo;</a>
+                </li>`;
                 $ul.append(next);
             }
 
-            // Fungsi untuk menghapus filter kategori
             window.clearKategoriFilter = function() {
                 console.log('Menghapus filter kategori');
                 kategoriFilter = '';
@@ -1178,7 +1194,6 @@ include '../../src/template/headers.php'
                 filterAndPaginate();
             };
 
-            // Inisialisasi
             filterAndPaginate();
         });
     </script>

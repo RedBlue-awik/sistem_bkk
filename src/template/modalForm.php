@@ -305,7 +305,7 @@
                 </div>
 
                 <div class="text-center mb-3">
-                    <span class="phone-number">+62846583456</span>
+                    <span class="phone-number">+621234567890</span>
                 </div>
 
                 <div class="accordion" id="accordionDaftar">
@@ -471,7 +471,7 @@ Mohon Bantuannya ya,
 Terima kasih!`;
 
         // Buka WhatsApp
-        window.open(`https://wa.me/6285607406595?text=${encodeURIComponent(pesan)}`, "_blank");
+        window.open(`https://wa.me/621234567890?text=${encodeURIComponent(pesan)}`, "_blank");
 
         // Tutup modal setelah 200ms
         setTimeout(() => {

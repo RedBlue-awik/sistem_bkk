@@ -12,7 +12,6 @@ $daftarperusahaan = getPerusahaan();
 
 // Cek apakah tombol tambah di klik
 if (isset($_POST['tambah'])) {
-
     if (tambahLoker($_POST) > 0) {
         // SweetAlert untuk berhasil
         echo "
@@ -45,7 +44,6 @@ if (isset($_POST['tambah'])) {
 
 // Cek apakah tombol edit di klik
 if (isset($_POST['edit'])) {
-
     if (editLoker($_POST) !== false) {
         echo "
         <script>
@@ -89,9 +87,16 @@ function getHistoryLoker()
     $loker = [];
 
     while ($row = mysqli_fetch_assoc($result)) {
-        // Format gaji langsung
-        $angka = str_replace(['.', ','], ['', '.'], $row['gaji']);
-        $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($angka) . '/' . $row['kpn_gaji_diberi'];
+        $gaji_parts = explode('-', $row['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[0])) : 0;
+        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[1])) : $gaji_minimal;
+
+        // Format tampilan gaji
+        if ($gaji_minimal == $gaji_maksimal) {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . '/' . $row['kpn_gaji_diberi'];
+        } else {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . '/' . $row['kpn_gaji_diberi'];
+        }
 
         // Ubah persyaratan ke array
         if (is_string($row['persyaratan'])) {
@@ -111,7 +116,7 @@ $historyLoker = getHistoryLoker();
 <html lang="en">
 
 <?php
-$title = "Lowongan-Kerja";
+$title = "History Lowongan Kerja";
 include '../../src/template/headers.php'
 ?>
 
@@ -127,7 +132,7 @@ include '../../src/template/headers.php'
         font-family: "Poppins", sans-serif;
     }
 
-    /*K onten centering: no offset on mobile, offset on desktop */
+    /* Konten centering: no offset on mobile, offset on desktop */
     .content {
         padding: 1.5rem;
     }
@@ -153,7 +158,6 @@ include '../../src/template/headers.php'
         .mapsLink {
             font-size: 13px;
         }
-
     }
 
     @media (min-width: 768px) {
@@ -267,24 +271,17 @@ include '../../src/template/headers.php'
                 </ul>
                 <!--begin::End Navbar Links-->
                 <ul class="navbar-nav ms-auto">
-
                     <!--begin::User Menu Dropdown-->
                     <li class="nav-item dropdown user-menu">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img
-                                src="../../src/assets/img/logo.png"
-                                class="user-image rounded-circle shadow"
-                                alt="User Image" />
+                            <img src="../../src/assets/img/logo.png" class="user-image rounded-circle shadow" alt="User Image" />
                             <span class="d-none d-md-inline"><?= $_SESSION["nama"]; ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                             <!--begin::User Image-->
                             <li class="user-header bg-secondary-subtle">
                                 <?php if ($_SESSION["gambar"] !== "") : ?>
-                                    <img
-                                        src="../../dist/assets/img/user2-160x160.jpg"
-                                        class="rounded-circle shadow"
-                                        alt="User Image" />
+                                    <img src="../../dist/assets/img/user2-160x160.jpg" class="rounded-circle shadow" alt="User Image" />
                                 <?php endif; ?>
                                 <p class="fw-semibold text-light">Nama</p>
                                 <span class="badge bg-warning-subtle p-2 fs-5 px-3 mb-1"><?= $_SESSION["nama"]; ?></span>
@@ -355,16 +352,14 @@ include '../../src/template/headers.php'
                         $historyLoker = getHistoryLoker();
                         ?>
 
-                        <div class="row g-3 mt-3" id="lokerCards"><Wbr></Wbr>
+                        <div class="row g-3 mt-3" id="lokerCards">
                             <!-- Daftar Loker -->
                             <?php
                             foreach ($historyLoker as $loker) :
                                 $alamat = $loker['alamat'];
-                            ?>
-                                <?php
                                 $isTutup = strtotime($loker['tanggal_ditutup']) < time();
                                 $isBelumBuka = strtotime($loker['tanggal_dibuka']) > time();
-                                ?>
+                            ?>
                                 <div class="col-sm-6 col-xl-4 loker-card"
                                     data-judul="<?= htmlspecialchars(strtolower($loker['judul'])) ?>"
                                     data-perusahaan="<?= htmlspecialchars(strtolower($loker['nama_perusahaan'])) ?>"
@@ -394,34 +389,35 @@ include '../../src/template/headers.php'
                                                     <div class="mt-1 ms-2 d-flex flex-column">
                                                         <span class="mb-1 mapsLink"><?= '<a class="linkMaps icon-link icon-link-hover"  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank">' . $alamat . '</a>'; ?></span>
                                                         <div class="d-flex flex-column">
-                                                            <?php
-                                                            if ($isTutup) {
+                                                            <?php if ($isTutup) : ?>
+                                                                <?php
                                                                 $tanggal_tutup = strtotime($loker['tanggal_ditutup']);
                                                                 $hari_ini = strtotime(date('Y-m-d'));
                                                                 $selisih_hari = ceil(($hari_ini - $tanggal_tutup) / 86400);
-                                                            ?>
+                                                                ?>
                                                                 <span class="text-muted" style="font-size: 12px;">
                                                                     <strong>Sudah di Tutup <?= $selisih_hari ?> Hari Lalu</strong>
                                                                 </span>
-                                                            <?php } elseif ($isBelumBuka) {
+                                                            <?php elseif ($isBelumBuka) : ?>
+                                                                <?php
                                                                 $tanggal_dibuka = strtotime($loker['tanggal_dibuka']);
                                                                 $hari_ini = strtotime(date('Y-m-d'));
                                                                 $selisih_hari = ceil(($tanggal_dibuka - $hari_ini) / 86400);
-                                                            ?>
+                                                                ?>
                                                                 <span class="text-muted" style="font-size: 12px;">
                                                                     <strong>Dibuka <?= $selisih_hari ?> Hari Lagi</strong>
                                                                 </span>
-                                                            <?php } else { ?>
+                                                            <?php else : ?>
                                                                 <span class="time" style="font-size: 10px;">
                                                                     <?= $loker['tanggal_dibuka'] ?> -- <?= $loker['tanggal_ditutup'] ?>
                                                                 </span>
-                                                            <?php } ?>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column align-items-center">
                                                     <?php if ($_SESSION['level'] == 'admin') : ?>
-                                                        <span class="btn btn-group me-n3">
+                                                        <span class="d-flex p-3 me-n3">
                                                             <a href="" class="btn btn-sm btn-outline-success mb-1 me-1" data-bs-toggle="modal" data-bs-target="#modalEdit<?= $loker['id_lowongan']; ?>" data-bs-trigger="hover" data-bs-placement="top" data-bs-custom-class="custom-tooltip-Edit" data-bs-title="Edit ( Ubah )"><i class="fas fa-gear"></i></a>
                                                             <a href="../../src/config/hapus-dataloker.php?id=<?= $loker['id_lowongan'] ?>" class="btn btn-sm btn-outline-danger btn-hapus mb-1 ms-1" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-custom-class="custom-tooltip-Delete" data-bs-title="Delete ( Hapus )"><i class="fas fa-trash"></i></a>
                                                         </span>
@@ -432,7 +428,6 @@ include '../../src/template/headers.php'
                                                             <a href="" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                         <?php else : ?>
                                                             <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
-
                                                         <?php endif; ?>
                                                     <?php endif; ?>
                                                 </div>
@@ -460,9 +455,6 @@ include '../../src/template/headers.php'
                         <!--end::Pagination Controls-->
                     </div>
                     <!--end::Row-->
-                    <!--begin::Row-->
-
-                    <!-- /.row (main row) -->
                 </div>
                 <!--end::Container-->
             </div>
@@ -477,103 +469,15 @@ include '../../src/template/headers.php'
     <?php include '../../src/template/footer.php'; ?>
 
     <!-- Modal -->
-    <!--begin::Modal Tambah Data-->
-    <div class="modal fade" id="modalLoker" tabindex="-1" aria-labelledby="modalLokerLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalLokerLabel">Tambah Lowongan Kerja</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="" method="post" class="needs-validation" novalidate>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="input-group my-3">
-                                <div class="input-group-text px-3"><span class="fas fa-user-tie fa-lg"></span></div>
-                                <div class="form-floating">
-                                    <input id="judul" type="judul" name="judul" class="form-control" placeholder="" required autocomplete="off" />
-                                    <label for="judul" class="form-label">Judul</label>
-                                </div>
-                            </div>
-                            <div class="input-group my-3">
-                                <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyType1">Rp</button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="setMataUang('Rp', 1)">Rp - Rupiah</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setMataUang('$', 1)">$ - Dollar</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setMataUang('€', 1)">€ - Euro</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setMataUang('£', 1)">£ - Pound</a></li>
-                                </ul>
-                                <input type="hidden" name="mata_uang" id="mata_uang1" value="Rp">
-                                <div class="form-floating">
-                                    <input id="gaji" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" required autocomplete="off" />
-                                    <label for="gaji" class="form-label">Gaji</label>
-                                </div>
-                                <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi1" value="h">
-                                <button class="btn btn-hidden border border-top dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod1">/H</button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('H', 1)">/Hari</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('M', 1)">/Minggu</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', 1)">/bulan</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', 1)">/Tahun</a></li>
-                                </ul>
-                                <div class="input-group-text px-3"><span class="fas fa-money-bill-wave fa-lg"></span></div>
-                            </div>
-                            <div class="input-group my-3">
-                                <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
-                                <div class="form-floating">
-                                    <select class="form-control" name="perusahaan" id="perusahaan" placeholder="" required>
-                                        <option value="" disabled selected> Pilih Perusahaan </option>
-                                        <?php foreach ($daftarperusahaan as $perusahaan) : ?>
-                                            <option value="<?= $perusahaan['id_perusahaan']; ?>">
-                                                <?= $perusahaan['nama_perusahaan']; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <label for="perusahaan" class="form-label">Perusahaan</label>
-                                </div>
-                            </div>
-                            <div class="input-group my-3">
-                                <div class="form-floating">
-                                    <div id="persyaratan-list">
-                                        <!-- Input Persyaratan akan muncul di sini -->
-                                    </div>
-
-                                    <!-- Tombol untuk menambah persyaratan -->
-                                    <button type="button" class="btn btn-primary" id="add-btn">+ Tambah Persyaratan</button>
-                                    <br>
-                                </div>
-                            </div>
-                            <div class="input-group my-3">
-                                <div class="form-floating">
-                                    <textarea name="deskripsi" id="deskripsi" class="form-control" placeholder=""></textarea>
-                                    <label for="deskripsi">Deskripsi</label>
-                                </div>
-                            </div>
-                            <div class="input-group my-3">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="date" class="form-control flatpickr" id="tanggal_dibuka" name="tanggal_dibuka" placeholder="" required autocomplete="off" data-date-format="Y-m-d">
-                                    <label for="tanggal_dibuka" class="form-label">Tanggal Dibuka</label>
-                                </div>
-                                <div class="input-group-text mx-1 rounded"><label class="fas fa-business-time fa-lg"></label></div>
-                                <div class="form-floating flex-grow-1">
-                                    <input type="date" class="form-control flatpickr" id="tanggal_ditutup" name="tanggal_ditutup" placeholder="" required autocomplete="off" data-date-format="Y-m-d">
-                                    <label for="tanggal_ditutup" class="form-label">Tanggal Ditutup</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" name="tambah" class="btn btn-primary">Simpan!</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- End::Modal Tambah Data -->
 
     <!-- Modal Edit -->
     <?php foreach ($historyLoker as $loker) : ?>
+        <?php
+        $gaji_parts = explode('-', $loker['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? trim($gaji_parts[0]) : '';
+        $gaji_maksimal = isset($gaji_parts[1]) ? trim($gaji_parts[1]) : '';
+        $isRentang = !empty($gaji_maksimal) && $gaji_maksimal !== $gaji_minimal;
+        ?>
         <div class="modal fade" id="modalEdit<?= $loker['id_lowongan']; ?>" tabindex="-1" aria-labelledby="modalEditLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -581,7 +485,7 @@ include '../../src/template/headers.php'
                         <h1 class="modal-title fs-5" id="modalEditLabel">Edit Lowongan Kerja</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="" method="post" class="needs-validation" novalidate>
+                    <form action="" method="post" class="needs-validation" novalidate onsubmit="return validateGajiFormEdit(<?= $loker['id_lowongan']; ?>)">
                         <input type="hidden" name="id_lowongan" value="<?= $loker['id_lowongan']; ?>">
                         <div class="modal-body">
                             <div class="row">
@@ -604,8 +508,15 @@ include '../../src/template/headers.php'
                                     </ul>
                                     <input type="hidden" name="mata_uang" id="mata_uang<?= $loker['id_lowongan']; ?>" value="<?= $loker['mata_uang']; ?>">
                                     <div class="form-floating">
-                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" value="<?= $loker['gaji']; ?>" autocomplete="off" />
+                                        <input id="gaji<?= $loker['id_lowongan']; ?>" type="text" name="gaji" class="gaji form-control" placeholder="Masukkan Gaji" value="<?= $gaji_minimal; ?>" autocomplete="off" />
                                         <label for="gaji<?= $loker['id_lowongan']; ?>" class="form-label">Gaji</label>
+                                    </div>
+                                    <div id="gajiAkhirContainer<?= $loker['id_lowongan']; ?>" style="width: 12rem; display: <?= $isRentang ? 'flex' : 'none'; ?>;">
+                                        <div class="input-group-text px-3"><span class="fw-semibold">-</span></div>
+                                        <div class="form-floating">
+                                            <input id="gaji_akhir<?= $loker['id_lowongan']; ?>" type="text" name="gaji_akhir" class="gaji_akhir form-control rounded-0" placeholder="Masukkan Gaji Akhir" value="<?= $gaji_maksimal; ?>" autocomplete="off" />
+                                            <label for="gaji_akhir<?= $loker['id_lowongan']; ?>" class="form-label">Gaji Akhir</label>
+                                        </div>
                                     </div>
                                     <input type="hidden" name="kpn_gaji_diberi" id="kpn_gaji_diberi<?= $loker['id_lowongan']; ?>" value="<?= $loker['kpn_gaji_diberi']; ?>">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyPeriod<?= $loker['id_lowongan']; ?>">
@@ -614,10 +525,15 @@ include '../../src/template/headers.php'
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('H', <?= $loker['id_lowongan']; ?>)">/Hari</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('M', <?= $loker['id_lowongan']; ?>)">/Minggu</a></li>
-                                        <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', <?= $loker['id_lowongan']; ?>)">/bulan</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('B', <?= $loker['id_lowongan']; ?>)">/Bulan</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="setkpn_gaji_diberi('T', <?= $loker['id_lowongan']; ?>)">/Tahun</a></li>
                                     </ul>
-                                    <div class="input-group-text px-3"><span class="fas fa-money-bill-wave fa-lg"></span></div>
+                                </div>
+                                <div class="form-check ms-3 mt-2">
+                                    <input class="form-check-input" type="checkbox" id="rentangGaji<?= $loker['id_lowongan']; ?>" onchange="toggleGajiAkhir(<?= $loker['id_lowongan']; ?>)" <?= $isRentang ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="rentangGaji<?= $loker['id_lowongan']; ?>">
+                                        Gaji Rentang
+                                    </label>
                                 </div>
                                 <div class="input-group my-3">
                                     <div class="input-group-text px-3"><span class="fas fa-building fa-lg"></span></div>
@@ -674,38 +590,36 @@ include '../../src/template/headers.php'
         </div>
     <?php endforeach; ?>
     <!-- End::Modal Edit Data -->
+
     <!--begin::Script-->
     <!-- OPTIONAL SCRIPTS -->
 
     <!--begin::Validation-->
     <script>
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
         (() => {
             'use strict'
-
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
             const forms = document.querySelectorAll('.needs-validation')
-
-            // Loop over them and prevent submission
             Array.from(forms).forEach(form => {
                 form.addEventListener('submit', event => {
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
                     }
-
                     form.classList.add('was-validated')
                 }, false)
             })
         })()
 
-        // Reset form validation when modal is closed
         const modalTambah = document.getElementById('modalLoker');
-
         modalTambah.addEventListener('hidden.bs.modal', function() {
             const form = modalTambah.querySelector('form');
-            form.classList.remove('was-validated'); // Hapus kelas validasi
-            form.reset(); // Reset semua input di dalam form
+            form.classList.remove('was-validated');
+            form.reset();
+            // Reset gaji akhir container
+            const gajiAkhirContainer = document.getElementById('gajiAkhirContainer');
+            gajiAkhirContainer.style.display = 'none';
+            const rentangGaji = document.getElementById('rentangGaji');
+            rentangGaji.checked = false;
         });
     </script>
     <!--end::Validation-->
@@ -714,17 +628,12 @@ include '../../src/template/headers.php'
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const modals = document.querySelectorAll('.modalLoker');
-
             modals.forEach(modal => {
                 modal.addEventListener('hidden.bs.modal', function() {
-                    // Reset form di dalam modal
                     const form = modal.querySelector('form');
                     if (form) {
                         form.reset();
                     }
-
-                    // Kalau kamu pakai value dari PHP, perlu di-*refresh* datanya via AJAX atau reload
-                    // Tapi kalau isiannya dari value HTML langsung, cukup pakai form.reset()
                 });
             });
         });
@@ -732,33 +641,20 @@ include '../../src/template/headers.php'
     <!-- end::Form -->
 
     <!-- Script Persyaratan -->
-    <!-- Link ke JS Bootstrap dan jQuery -->
     <script>
-        // Fungsi untuk menambah persyaratan
         document.getElementById('add-btn').addEventListener('click', function() {
             const persyaratanList = document.getElementById('persyaratan-list');
-
-            // Hitung jumlah persyaratan yang sudah ada
-            const persyaratanCount = persyaratanList.children.length + 1;
-
-            // Membuat elemen baru untuk input
             const newPersyaratan = document.createElement('div');
             newPersyaratan.classList.add('input-container');
-
-
-            // HTML untuk input persyaratan baru
             newPersyaratan.innerHTML = `
-            <div class="input-group">
-                <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
-                <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
-            </div><br>
+                <div class="input-group">
+                    <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
+                    <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
+                </div><br>
             `;
-
-            // Menambahkan input baru ke list
             persyaratanList.appendChild(newPersyaratan);
         });
 
-        // Fungsi untuk menghapus input persyaratan
         function removePersyaratan(button) {
             const persyaratanContainer = button.parentElement.parentElement;
             persyaratanContainer.remove();
@@ -767,41 +663,44 @@ include '../../src/template/headers.php'
         function addPersyaratan(id) {
             const list = document.getElementById(`persyaratan-list-${id}`);
             const index = list.children.length;
-
             const newInput = document.createElement('div');
             newInput.classList.add('input-group', 'mb-2');
             newInput.id = `persyaratan-item-${index}`;
             newInput.innerHTML = `
-        <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
-        <button type="button" class="btn btn-danger" onclick="removePersyaratan(${index})">Hapus</button>
-    `;
-
+                <input type="text" name="persyaratan[]" class="form-control" placeholder="Tulis Persyaratan" required>
+                <button type="button" class="btn btn-danger" onclick="removePersyaratan(this)">Hapus</button>
+            `;
             list.appendChild(newInput);
-        }
-
-        function removePersyaratan(button) {
-            // Cari parent .input-container (tambah) atau .input-group (edit)
-            let container = button.closest('.input-container') || button.closest('.input-group');
-            if (container) container.remove();
         }
     </script>
     <!-- End Sript Persyaratan -->
 
     <!--begin::Nominal Gaji-->
     <script>
-        // Ambil semua elemen dengan class 'input-gaji'
         document.querySelectorAll('input[name="gaji"]').forEach(function(input) {
             input.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/[^0-9]/g, '');
                 let formattedValue = '';
-
                 for (let i = value.length - 1; i >= 0; i--) {
                     formattedValue = value[i] + formattedValue;
                     if ((value.length - i) % 3 === 0 && i !== 0) {
                         formattedValue = '.' + formattedValue;
                     }
                 }
+                e.target.value = formattedValue;
+            });
+        });
 
+        document.querySelectorAll('input[name="gaji_akhir"]').forEach(function(input) {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                let formattedValue = '';
+                for (let i = value.length - 1; i >= 0; i--) {
+                    formattedValue = value[i] + formattedValue;
+                    if ((value.length - i) % 3 === 0 && i !== 0) {
+                        formattedValue = '.' + formattedValue;
+                    }
+                }
                 e.target.value = formattedValue;
             });
         });
@@ -814,7 +713,8 @@ include '../../src/template/headers.php'
         document.addEventListener('DOMContentLoaded', function() {
             flatpickr(".flatpickr", {
                 dateFormat: "Y-m-d",
-                allowInput: true
+                allowInput: true,
+                disableMobile: true
             });
         });
     </script>
@@ -822,8 +722,8 @@ include '../../src/template/headers.php'
     <!-- Begin::Currency Dropdown -->
     <script>
         function setkpn_gaji_diberi(value, id) {
-            document.getElementById('currencyPeriod' + id).textContent = '/' + value.charAt(0).toUpperCase(); // Ubah tampilan di tombol
-            document.getElementById('kpn_gaji_diberi' + id).value = value; // Simpan value asli
+            document.getElementById('currencyPeriod' + id).textContent = '/' + value.charAt(0).toUpperCase();
+            document.getElementById('kpn_gaji_diberi' + id).value = value;
         }
 
         function setMataUang(value, id) {
@@ -833,19 +733,102 @@ include '../../src/template/headers.php'
     </script>
     <!-- End::Currency Dropdown -->
 
+    <!-- Begin::Toggle Gaji Akhir -->
+    <script>
+        function toggleGajiAkhir(id = null) {
+            const containerId = id ? `gajiAkhirContainer${id}` : 'gajiAkhirContainer';
+            const container = document.getElementById(containerId);
+            const checkboxId = id ? `rentangGaji${id}` : 'rentangGaji';
+            const checkbox = document.getElementById(checkboxId);
+
+            if (checkbox.checked) {
+                container.style.display = 'flex';
+                // Set required attribute jika checkbox dicentang
+                const gajiAkhirInput = container.querySelector('input[name="gaji_akhir"]');
+                if (gajiAkhirInput) {
+                    gajiAkhirInput.required = true;
+                }
+            } else {
+                container.style.display = 'none';
+                // Hapus required attribute dan clear value jika checkbox tidak dicentang
+                const gajiAkhirInput = container.querySelector('input[name="gaji_akhir"]');
+                if (gajiAkhirInput) {
+                    gajiAkhirInput.required = false;
+                    gajiAkhirInput.value = '';
+                }
+            }
+        }
+
+        // Fungsi untuk inisialisasi toggle saat modal dibuka
+        function initGajiToggle(id = null) {
+            const checkboxId = id ? `rentangGaji${id}` : 'rentangGaji';
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                toggleGajiAkhir(id);
+            }
+        }
+    </script>
+    <!-- End::Toggle Gaji Akhir -->
+
     <!-- Begin::Details -->
     <script>
         document.querySelectorAll('.card-click').forEach(card => {
             card.addEventListener('click', function(e) {
-                // Cegah navigasi kalau klik tombol (yang ada <a> di dalamnya)
                 if (e.target.closest('a')) return;
-
                 const id = this.getAttribute('data-id');
-                window.open(`../../src/config/detail_loker.php?id_lowongan=${id}`);
+                window.open(`./detail_loker.php?id_lowongan=${id}`);
             });
         });
     </script>
     <!-- End::Details -->
+
+    <!-- Validasi Form Gaji -->
+    <script>
+        function validateGajiForm() {
+            const rentangGajiChecked = document.getElementById('rentangGaji').checked;
+            const gajiAkhirInput = document.getElementById('gaji_akhir');
+
+            if (rentangGajiChecked && (!gajiAkhirInput.value || gajiAkhirInput.value.trim() === '')) {
+                alert('Harap isi gaji akhir jika memilih rentang gaji');
+                gajiAkhirInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateGajiFormEdit(id) {
+            const rentangGajiChecked = document.getElementById('rentangGaji' + id).checked;
+            const gajiAkhirInput = document.getElementById('gaji_akhir' + id);
+
+            if (rentangGajiChecked && (!gajiAkhirInput.value || gajiAkhirInput.value.trim() === '')) {
+                alert('Harap isi gaji akhir jika memilih rentang gaji');
+                gajiAkhirInput.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        // Inisialisasi saat modal dibuka
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalLoker = document.getElementById('modalLoker');
+            if (modalLoker) {
+                modalLoker.addEventListener('shown.bs.modal', function() {
+                    initGajiToggle();
+                });
+            }
+
+            // Untuk modal edit
+            const modalsEdit = document.querySelectorAll('[id^="modalEdit"]');
+            modalsEdit.forEach(modal => {
+                modal.addEventListener('shown.bs.modal', function() {
+                    const id = this.id.replace('modalEdit', '');
+                    initGajiToggle(id);
+                });
+            });
+        });
+    </script>
 
     <script>
         $(function() {

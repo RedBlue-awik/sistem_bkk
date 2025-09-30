@@ -875,11 +875,11 @@ while ($row = mysqli_fetch_assoc($query)) {
                         <h5 class="footer-title mb-3">Tentang Kami</h5>
                         <p>SMK MAMBA'UL IHSAN adalah sekolah kejuruan yang berkomitmen untuk menghasilkan lulusan yang kompeten, profesional, dan berakhlak mulia.</p>
                         <div class="social-icons mt-4">
-                            <a href="https://www.facebook.com/smk.mambaul.ihsan/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-facebook-f"></i></a>
-                            <a href="https://www.instagram.com/smk_mambaul_ihsan/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-instagram"></i></a>
-                            <a href="https://www.youtube.com/@smkmambaulihsan4223/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-youtube"></i></a>
-                            <a href="https://www.tiktok.com/@smksmambaul_ihsan" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><i class="fab fa-tiktok"></i></a>
-                            <a href="https://smkmambaulihsan.sch.id/" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><img src="./src/assets/img/logo.png" style="max-width: 50px;"></a>
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-instagram"></i></a>
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="fab fa-youtube"></i></a>
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><i class="fab fa-tiktok"></i></a>
+                            <a href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-circle"><img src="./src/assets/img/logo.png" style="max-width: 50px;"></a>
                         </div>
                     </div>
 
@@ -892,11 +892,11 @@ while ($row = mysqli_fetch_assoc($query)) {
                         </div>
                         <div class="contact-info mb-2">
                             <i class="fas fa-phone me-2"></i>
-                            <span>0856-0740-6595</span>
+                            <span>0123-4567-8910</span>
                         </div>
                         <div class="contact-info mb-2">
                             <i class="fas fa-envelope me-2"></i>
-                            <span>smkppmi@gmail.com</span>
+                            <span>example@gmail.com</span>
                         </div>
                     </div>
                 </div>
