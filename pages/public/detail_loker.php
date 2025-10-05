@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Week;
+
 session_start();
 
 require '../../src/functions.php';
@@ -86,10 +89,18 @@ function getLoker()
 
     $loker = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        // Format gaji langsung
-        $angka = str_replace(['.', ','], ['', '.'], $row['gaji']);
-        $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($angka) . '/' . $row['kpn_gaji_diberi'];
+        $gaji_parts = explode('-', $row['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[0])) : 0;
+        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[1])) : $gaji_minimal;
 
+        // Format tampilan gaji dengan periode kepanjangan
+        $periode_gaji = formatPeriodeGaji($row['kpn_gaji_diberi']);
+        if ($gaji_minimal == $gaji_maksimal) {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . '/ ' . $periode_gaji;
+        } else {
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . '/ ' . $periode_gaji;
+        }
+        
         // Ubah persyaratan ke array
         if (is_string($row['persyaratan'])) {
             $row['persyaratan'] = explode(',', $row['persyaratan']);
@@ -111,6 +122,26 @@ if (isset($_GET['id_lowongan'])) {
               JOIN perusahaan ON lowongan.id_perusahaan = perusahaan.id_perusahaan 
               WHERE lowongan.id_lowongan = $id");
     $data = mysqli_fetch_assoc($query);
+    
+    // Proses format gaji untuk data detail
+    if ($data) {
+        $gaji_parts = explode('-', $data['gaji']);
+        $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[0])) : 0;
+        $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[1])) : $gaji_minimal;
+
+        // Format tampilan gaji untuk data detail dengan periode kepanjangan
+        $periode_gaji = formatPeriodeGaji($data['kpn_gaji_diberi']);
+        if ($gaji_minimal == $gaji_maksimal) {
+            $data['gaji_full'] = $data['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' /' . $periode_gaji;
+        } else {
+            $data['gaji_full'] = $data['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . ' /' . $periode_gaji;
+        }
+        
+        // Ubah persyaratan ke array untuk data detail
+        if (is_string($data['persyaratan'])) {
+            $data['persyaratan'] = explode(',', $data['persyaratan']);
+        }
+    }
 } else {
     echo "ID tidak valid.";
     exit;
@@ -137,6 +168,7 @@ function getCvFile($id_alumni, $id_lowongan)
 }
 
 $alamat = $data['alamat'];
+$hari_ini = strtotime(date('Y-m-d'));
 ?>
 
 <!DOCTYPE html>
@@ -300,8 +332,7 @@ include '../../src/template/headers.php';
 
                                     <div class="d-flex flex-wrap align-items-baseline gap-3 mt-3 flex-column info">
                                         <span class="mapslink"><?= '<a class="linkMaps icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.200rem, 0); "  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"> <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/> </svg>' . $alamat . '</a>'; ?></span>
-                                        <span class="text-muted"><i class="bi bi-cash-stack" style="margin-right: .33rem;"></i><?= $data['mata_uang'] . ' ' . formatUangSingkat($data['gaji']) . '/' . formatPeriodeGaji($data['kpn_gaji_diberi']) ?>
-                                        </span>
+                                        <span class="text-muted"><i class="bi bi-cash-stack" style="margin-right: .33rem;"></i><?= $data['gaji_full'] ?></span>
                                         <span class="text-muted"><i class="bi bi-building me-1"></i><?= $data['bidang_usaha'] ?></span>
                                         <?php if (strtotime($data['tanggal_ditutup']) < time()) : ?>
                                             <span class="text-muted" style="font-size: 12px;"><i class="bi bi-clock" style="font-size: 15px; margin-right: .33rem;"></i><?= $data['tanggal_ditutup'] ?> <?php $tanggal_tutup = strtotime($data['tanggal_ditutup']);
