@@ -108,6 +108,11 @@
             --bs-tooltip-color: #ffff;
         }
 
+        .custom-tooltip-Detail {
+            --bs-tooltip-bg: #11224E;
+            --bs-tooltip-color: #ffff;
+        }
+
         .p-b {
             padding: 3px;
         }

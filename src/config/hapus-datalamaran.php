@@ -10,14 +10,14 @@ if (!isset($_SESSION['id_pengguna'])) {
 exit;
 }
 
-if ($_SESSION['level'] !== 'admin') {
-    echo "
-        <script>
-            document.location.href = '../../index.php';
-        </script>
-    ";
-exit;
-}
+// if ($_SESSION['level'] !== 'admin') {
+//     echo "
+//         <script>
+//             document.location.href = '../../index.php';
+//         </script>
+//     ";
+// exit;
+// }
 
 // Penghubung antar file di PHP
 require '../functions.php';

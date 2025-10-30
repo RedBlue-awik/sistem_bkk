@@ -4,6 +4,7 @@ session_start();
 require '../../src/functions.php';
 include '../../src/controller/LoginF.php';
 include '../../src/controller/lupapw.php';
+
 // Ambil data dari database
 $query = mysqli_query($conn, "
     SELECT p.nama_perusahaan, COUNT(*) AS total
@@ -18,6 +19,23 @@ while ($row = mysqli_fetch_assoc($query)) {
   $labels[] = $row['nama_perusahaan'];
   $data[] = (int)$row['total'];
 }
+
+// Query untuk data status kerjasama
+$query_kerjasama = mysqli_query($conn, "
+    SELECT status_kerjasama, COUNT(*) as total 
+    FROM lowongan 
+    GROUP BY status_kerjasama
+");
+$labels_kerjasama = [];
+$data_kerjasama = [];
+$colors_kerjasama = [];
+while ($row = mysqli_fetch_assoc($query_kerjasama)) {
+    $status = $row['status_kerjasama'] == 'bekerja_sama' ? 'Bekerja Sama' : 'Tidak Bekerja Sama';
+    $labels_kerjasama[] = $status;
+    $data_kerjasama[] = (int)$row['total'];
+    $colors_kerjasama[] = $row['status_kerjasama'] == 'bekerja_sama' ? '#28a745' : '#dc3545';
+}
+
 $tahun_sekarang = date('Y');
 $sql = "
     SELECT MONTHNAME(waktu_login) AS bulan, COUNT(DISTINCT id_user) AS jumlah
@@ -58,6 +76,7 @@ $sql_online = mysqli_query($conn, "
 $row_online = mysqli_fetch_assoc($sql_online);
 $total_online = $row_online['total_online'];
 $total_perusahaan = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM perusahaan"))['total'];
+$total_loker = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM lowongan"))['total'];
 ?>
 <!doctype html>
 <html lang="en">
@@ -102,7 +121,8 @@ include '../../src/template/headers.php';
     }
   }
   
-  .lamaran-chart-container {
+  .lamaran-chart-container,
+  .kerjasama-chart-container {
     width: 100%;
     max-width: 900px;
     height: 55rem;
@@ -114,7 +134,8 @@ include '../../src/template/headers.php';
     overflow: hidden;
   }
   
-  .lamaran-chart-container::before {
+  .lamaran-chart-container::before,
+  .kerjasama-chart-container::before {
     content: "";
     position: absolute;
     top: -50%;
@@ -125,12 +146,14 @@ include '../../src/template/headers.php';
     z-index: 1;
   }
   
-  .lamaran-chart-content {
+  .lamaran-chart-content,
+  .kerjasama-chart-content {
     position: relative;
     z-index: 2;
   }
   
-  .lamaran-chart-title {
+  .lamaran-chart-title,
+  .kerjasama-chart-title {
     color: white;
     font-size: 1.8rem;
     font-weight: 600;
@@ -138,7 +161,8 @@ include '../../src/template/headers.php';
     text-align: center;
   }
   
-  .lamaran-chart-wrapper {
+  .lamaran-chart-wrapper,
+  .kerjasama-chart-wrapper {
     height: calc(100% - 60px);
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
@@ -211,7 +235,9 @@ include '../../src/template/headers.php';
   
   /* Responsive styles */
   @media (max-width: 992px) {
-    .lamaran-chart-container, .login-chart-container {
+    .lamaran-chart-container, 
+    .kerjasama-chart-container, 
+    .login-chart-container {
       max-width: 100%;
       margin: 20px auto;
     }
@@ -224,7 +250,8 @@ include '../../src/template/headers.php';
   }
   
   @media (max-width: 768px) {
-    .lamaran-chart-wrapper {
+    .lamaran-chart-wrapper,
+    .kerjasama-chart-wrapper {
       height: 350px;
     }
     
@@ -232,12 +259,16 @@ include '../../src/template/headers.php';
       height: 350px;
     }
     
-    .lamaran-chart-container, .login-chart-container {
+    .lamaran-chart-container, 
+    .kerjasama-chart-container, 
+    .login-chart-container {
       padding: 15px;
       height: 45rem;
     }
     
-    .lamaran-chart-title, .login-chart-title {
+    .lamaran-chart-title,
+    .kerjasama-chart-title,
+    .login-chart-title {
       font-size: 1.5rem;
       margin-bottom: 15px;
     }
@@ -274,7 +305,8 @@ include '../../src/template/headers.php';
   }
   
   @media (max-width: 576px) {
-    .lamaran-chart-wrapper {
+    .lamaran-chart-wrapper,
+    .kerjasama-chart-wrapper {
       height: 300px;
     }
     
@@ -282,13 +314,17 @@ include '../../src/template/headers.php';
       height: 300px;
     }
     
-    .lamaran-chart-container, .login-chart-container {
+    .lamaran-chart-container, 
+    .kerjasama-chart-container, 
+    .login-chart-container {
       padding: 10px;
       height: 40rem;
       margin: 15px auto;
     }
     
-    .lamaran-chart-title, .login-chart-title {
+    .lamaran-chart-title,
+    .kerjasama-chart-title,
+    .login-chart-title {
       font-size: 1.3rem;
       margin-bottom: 10px;
     }
@@ -437,6 +473,18 @@ include '../../src/template/headers.php';
               </div>
             </div>
             
+            <!-- Chart Status Kerjasama Baru -->
+            <div class="kerjasama-chart-container bg-primary-subtle" data-bs-theme="dark">
+              <div class="kerjasama-chart-content">
+                <h3 class="kerjasama-chart-title">Status Kerjasama Perusahaan</h3>
+                <div class="kerjasama-chart-wrapper">
+                  <div class="chart-container">
+                    <canvas id="kerjasamaChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div class="row my-5 d-flex justify-content-evenly">
               <div class="col-12 col-md-5 col-lg-3">
                 <div class="card stats-card border-0 text-center">
@@ -457,6 +505,17 @@ include '../../src/template/headers.php';
                     </div>
                     <p class="text-muted mb-1">User Online</p>
                     <h4 class="fw-bold"><?= $total_online; ?></h4>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-5 col-lg-3">
+                <div class="card stats-card border-0 text-center">
+                  <div class="card-body">
+                    <div class="rounded d-flex align-items-center justify-content-center mx-auto mb-3 bg-warning" style="width:60px; height:60px;">
+                      <i class="fas fa-briefcase text-white fa-lg"></i>
+                    </div>
+                    <p class="text-muted mb-1">Lowongan</p>
+                    <h4 class="fw-bold"><?= $total_loker; ?></h4>
                   </div>
                 </div>
               </div>
@@ -489,35 +548,12 @@ include '../../src/template/headers.php';
   <?php include '../../src/template/footer.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // Chart Lamaran Siswa
     const labels = <?= json_encode($labels) ?>;
     const originalData = <?= json_encode($data) ?>;
-    function generateData() {
-      return originalData.map(() => Math.floor(Math.random() * 100) + 1);
-    }
     const colors = labels.map((_, i) => `hsl(${i * 35}, 70%, 60%)`);
     let chartType = 'doughnut';
     const ctx = document.getElementById('lamaranChart').getContext('2d');
-    const bgImage = new Image();
-    bgImage.src = '../../src/assets/img/logo.png';
-    const backgroundPlugin = {
-      id: 'customBackground',
-      beforeDraw: (chart) => {
-        if (bgImage.complete) {
-          const {
-            ctx,
-            width,
-            height
-          } = chart;
-          const imgwidth = width * 0.3;
-          const imgheight = height * 0.3;
-          const x = (width - imgwidth) / 2;
-          const y = (height - imgheight) / 2.3;
-          ctx.save();
-          ctx.drawImage(bgImage, x, y, imgwidth, imgheight);
-          ctx.restore();
-        }
-      }
-    };
     const lamaranChart = new Chart(ctx, {
       type: chartType,
       data: {
@@ -563,9 +599,9 @@ include '../../src/template/headers.php';
             bottom: 20
           }
         }
-      },
-      plugins: [backgroundPlugin]
+      }
     });
+
     function toggleChart() {
       const btn = document.querySelector('.Bt[data-bs-title]');
       if (lamaranChart.options.cutout) {
@@ -583,6 +619,60 @@ include '../../src/template/headers.php';
         });
       }
     }
+
+    // Chart Status Kerjasama
+    const kerjasamaLabels = <?= json_encode($labels_kerjasama) ?>;
+    const kerjasamaData = <?= json_encode($data_kerjasama) ?>;
+    const kerjasamaColors = <?= json_encode($colors_kerjasama) ?>;
+    
+    const kerjasamaCtx = document.getElementById('kerjasamaChart').getContext('2d');
+    const kerjasamaChart = new Chart(kerjasamaCtx, {
+      type: 'pie',
+      data: {
+        labels: kerjasamaLabels,
+        datasets: [{
+          label: 'Jumlah Lowongan',
+          data: kerjasamaData,
+          backgroundColor: kerjasamaColors,
+          hoverOffset: 15,
+          borderWidth: 2,
+          borderColor: 'rgba(255, 255, 255, 0.8)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: 'rgba(255, 255, 255, 0.9)',
+              font: { size: 14 },
+              padding: 20,
+              usePointStyle: true
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const val = ctx.raw;
+                const percent = ((val / total) * 100).toFixed(1);
+                return `${ctx.label}: ${val} lowongan (${percent}%)`;
+              }
+            }
+          }
+        },
+        layout: {
+          padding: {
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: 20
+          }
+        }
+      }
+    });
   </script>
   <script>
     // Chart Login Alumni

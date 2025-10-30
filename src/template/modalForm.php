@@ -329,7 +329,7 @@
                                         <div class="form-floating">
                                             <input id="no_telp" type="text" name="no_telp" class="form-control" placeholder="" required autocomplete="off" />
                                             <label for="no_telp" class="form-label"><i class="fas fa-phone-volume me-1"></i> No Telpone</label>
-                                            <p class="text-danger" style="font-size: 10px;" >* Masukkan No Telpone Yang Aktif !</p>
+                                            <p class="text-danger" style="font-size: 10px;">* Masukkan No Telpone Yang Aktif !</p>
                                         </div>
                                     </div>
 
@@ -362,6 +362,13 @@
                                             <label for="tahun_lulus" class="form-label">Tahun Lulus</label>
                                         </div>
                                         <div class="input-group-text input-group-text-custom2"><label for="tahun_lulus" class="fas fa-clock fa-lg"></label></div>
+                                    </div>
+                                    <div class="input-group input-group-custom">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control form-control-custom" name="alamat" id="alamat" placeholder="" required autocomplete="off">
+                                            <label for="alamat" class="form-label"><i class="fas fa-map-location-dot me-2"></i>Alamat</label>
+                                        </div>
+                                        <div class="input-group-text input-group-text-custom2"><span class="fas fa-location-dot fa-lg"></span></div>
                                     </div>
                                 </form>
                             </div>
@@ -459,14 +466,16 @@
         let tahun_lulus = document.getElementById("tahun_lulus").value;
         let no_telp = document.getElementById("no_telp").value;
         let pw = document.getElementById("daftarpassword").value;
+        let alamat = document.getElementById("alamat").value;
 
         // Buat pesan WhatsApp
         let pesan = `Halo admin BKK, Saya mau daftar di website BKK sebagai alumni
-Nama saya ${nama}
-Jurusan saya ${jurusan.toUpperCase()}
-Tahun Lulus saya pada ${tahun_lulus}
-No Telpone saya ${no_telp}
-Dan Password yang saya inginkan : ${pw}
+Nama saya ${nama},
+Jurusan saya ${jurusan.toUpperCase()},
+Tahun Lulus saya pada ${tahun_lulus},
+No Telpone saya ${no_telp},
+Alamat saya di ${alamat},
+Dan Password yang saya inginkan : ${pw},
 Mohon Bantuannya ya,
 Terima kasih!`;
 

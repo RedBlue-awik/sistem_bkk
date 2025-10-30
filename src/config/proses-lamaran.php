@@ -16,6 +16,16 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     exit;
 }
 
+// Cek status kerjasama lowongan
+$query_lowongan = mysqli_query($conn, "SELECT status_kerjasama FROM lowongan WHERE id_lowongan = '$id_lowongan'");
+if (!$query_lowongan || mysqli_num_rows($query_lowongan) == 0) {
+    echo "<script>alert('Lowongan tidak ditemukan.'); window.location='../../pages/public/loker.php';</script>";
+    exit;
+}
+
+$data_lowongan = mysqli_fetch_assoc($query_lowongan);
+$status_kerjasama = $data_lowongan['status_kerjasama'];
+
 $id_user = $_SESSION['id_pengguna'];
 
 // Ambil kode_pengguna dari user
@@ -64,81 +74,104 @@ if (mysqli_num_rows($cek) > 0) {
     exit;
 }
 
-// Proses upload CV jika ada file
-$cv_file_name = null;
-if (isset($_FILES['cv']) && $_FILES['cv']['error'] === UPLOAD_ERR_OK) {
-    $cv = $_FILES['cv'];
-    $ekstensi_file = strtolower(pathinfo($cv['name'], PATHINFO_EXTENSION));
-    $ekstensi_diperbolehkan = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
-    $ukuran_max = 100 * 1024 * 1024;
+// Proses upload CV hanya jika lowongan bekerja sama
+$cv_file_name = 'Tidak Ada CV';
+if ($status_kerjasama == 'bekerja_sama') {
+    if (isset($_FILES['cv']) && $_FILES['cv']['error'] === UPLOAD_ERR_OK) {
+        $cv = $_FILES['cv'];
+        $ekstensi_file = strtolower(pathinfo($cv['name'], PATHINFO_EXTENSION));
+        $ekstensi_diperbolehkan = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+        $ukuran_max = 100 * 1024 * 1024;
 
-    if (!in_array($ekstensi_file, $ekstensi_diperbolehkan)) {
-    ?>
+        if (!in_array($ekstensi_file, $ekstensi_diperbolehkan)) {
+        ?>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Format File Tidak Didukung',
+                        text: 'File harus berformat PDF, Word (.doc/.docx), atau Excel (.xls/.xlsx).',
+                    }).then(() => {
+                        window.history.back();
+                    });
+                });
+            </script>
+        <?php
+            exit;
+        }
+        if ($cv['size'] > $ukuran_max) {
+        ?>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ukuran File Terlalu Besar',
+                        text: 'Ukuran file maksimal 100MB.',
+                    }).then(() => {
+                        window.history.back();
+                    });
+                });
+            </script>
+        <?php
+            exit;
+        }
+        // Ubah nama file CV menjadi nama siswa
+        $nama_file = "cv_" . $nama_siswa_singkat . "_" . $id_lowongan . "." . $ekstensi_file;
+        $folder_tujuan = "../../src/assets/persyaratan/cv/";
+        if (!is_dir($folder_tujuan)) {
+            mkdir($folder_tujuan, 0777, true);
+        }
+        $path_upload = $folder_tujuan . $nama_file;
+        if (!move_uploaded_file($cv['tmp_name'], $path_upload)) {
+        ?>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Gagal',
+                        text: 'CV gagal diupload!',
+                    }).then(() => {
+                        window.history.back();
+                    });
+                });
+            </script>
+        <?php
+            exit;
+        }
+        $cv_file_name = $nama_file;
+    } else {
+        ?>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Format File Tidak Didukung',
-                    text: 'File harus berformat PDF, Word (.doc/.docx), atau Excel (.xls/.xlsx).',
+                    title: 'CV Diperlukan',
+                    text: 'Lowongan ini memerlukan upload CV.',
                 }).then(() => {
                     window.history.back();
                 });
             });
         </script>
-    <?php
+        <?php
         exit;
     }
-    if ($cv['size'] > $ukuran_max) {
-    ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Ukuran File Terlalu Besar',
-                    text: 'Ukuran file maksimal 100MB.',
-                }).then(() => {
-                    window.history.back();
-                });
-            });
-        </script>
-    <?php
-        exit;
-    }
-    // Ubah nama file CV menjadi nama siswa
-    $nama_file = "cv_" . $nama_siswa_singkat . "_" . $id_lowongan . "." . $ekstensi_file;
-    $folder_tujuan = "../../src/assets/persyaratan/cv/";
-    if (!is_dir($folder_tujuan)) {
-        mkdir($folder_tujuan, 0777, true);
-    }
-    $path_upload = $folder_tujuan . $nama_file;
-    if (!move_uploaded_file($cv['tmp_name'], $path_upload)) {
-    ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Upload Gagal',
-                    text: 'CV gagal diupload!',
-                }).then(() => {
-                    window.history.back();
-                });
-            });
-        </script>
-    <?php
-        exit;
-    }
-    $cv_file_name = $nama_file;
 }
 
-// Insert lamaran (tanpa kolom cv)
+// Insert lamaran
 $tanggal_lamar = date('Y-m-d');
-$status         = 'Menunggu';
+// Set status berdasarkan jenis lowongan
+if ($status_kerjasama == 'bekerja_sama') {
+    $status = 'Menunggu';
+} else {
+    $status = null ;
+}
 
-$insert = mysqli_query($conn, "INSERT INTO lamaran (id_siswa, id_lowongan, tanggal_lamar, status)
-                               VALUES ('$id_alumni', '$id_lowongan', '$tanggal_lamar', '$status')");
+$insert = mysqli_query($conn, "INSERT INTO lamaran (id_siswa, id_lowongan, tanggal_lamar, status, cv)
+                               VALUES ('$id_alumni', '$id_lowongan', '$tanggal_lamar', '$status', '$cv_file_name')");
 
 if ($insert) {
     ?>
@@ -148,7 +181,7 @@ if ($insert) {
             Swal.fire({
                 icon: 'success',
                 title: 'Lamaran Dikirim',
-                text: 'Lamaran berhasil dikirim!',
+                text: 'Lamaran berhasil dikirim! ',
             }).then(() => {
                 window.location.href = '../../pages/public/loker.php';
             });

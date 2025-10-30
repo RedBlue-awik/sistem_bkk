@@ -583,6 +583,7 @@ function tambahLoker($data)
 	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
 	$tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
 	$id_perusahaan = $data['perusahaan'];
+	$status_kerjasama = htmlspecialchars($data['status_kerjasama']);
 
 	// LOGIKA GABUNGAN GAJI - DIPERBAIKI
 	$gajiakhir = isset($data['gaji_akhir']) && !empty(trim($data['gaji_akhir']))
@@ -607,8 +608,8 @@ function tambahLoker($data)
 	}
 
 	// Query untuk menambahkan loker
-	$queryLoker = "INSERT INTO lowongan (judul, deskripsi, persyaratan, mata_uang, gaji, kpn_gaji_diberi, tanggal_dibuka, tanggal_ditutup, id_perusahaan) 
-                   VALUES('$judul', '$deskripsi', '$persyaratan', '$mata_uang', '$gaji', '$kpn_gaji_diberi', '$tanggal_dibuka', '$tanggal_ditutup', '$id_perusahaan')";
+	$queryLoker = "INSERT INTO lowongan (judul, deskripsi, persyaratan, mata_uang, gaji, kpn_gaji_diberi, tanggal_dibuka, tanggal_ditutup, id_perusahaan, status_kerjasama) 
+                   VALUES('$judul', '$deskripsi', '$persyaratan', '$mata_uang', '$gaji', '$kpn_gaji_diberi', '$tanggal_dibuka', '$tanggal_ditutup', '$id_perusahaan', '$status_kerjasama')";
 	$result = mysqli_query($conn, $queryLoker);
 
 	// Pengumuman untuk semua user
@@ -669,35 +670,36 @@ function cekPengumumanLokerBerakhir()
 // Function Logika Edit Loker
 function editLoker($data)
 {
-	global $conn;
+    global $conn;
 
-	$id_lowongan = htmlspecialchars($data['id_lowongan']);
-	$judul = htmlspecialchars($data['judul']);
-	$deskripsi = htmlspecialchars($data['deskripsi']);
-	$mata_uang = htmlspecialchars($data['mata_uang']);
-	$kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
-	$gajiawal = htmlspecialchars($data['gaji']);
-	$tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
-	$tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
-	$id_perusahaan = htmlspecialchars($data['perusahaan']);
+    $id_lowongan = htmlspecialchars($data['id_lowongan']);
+    $judul = htmlspecialchars($data['judul']);
+    $deskripsi = htmlspecialchars($data['deskripsi']);
+    $mata_uang = htmlspecialchars($data['mata_uang']);
+    $kpn_gaji_diberi = htmlspecialchars($data['kpn_gaji_diberi']);
+    $gajiawal = htmlspecialchars($data['gaji']);
+    $tanggal_dibuka = htmlspecialchars($data['tanggal_dibuka']);
+    $tanggal_ditutup = htmlspecialchars($data['tanggal_ditutup']);
+    $id_perusahaan = htmlspecialchars($data['perusahaan']);
+    $status_kerjasama = htmlspecialchars($data['status_kerjasama']);
 
-	$persyaratan = isset($data['persyaratan']) && is_array($data['persyaratan'])
-		? implode(',', $data['persyaratan'])
-		: 'Tidak ada persyaratan';
+    $persyaratan = isset($data['persyaratan']) && is_array($data['persyaratan'])
+        ? implode(',', $data['persyaratan'])
+        : 'Tidak ada persyaratan';
 
-	// LOGIKA GABUNGAN GAJI - DIPERBAIKI
-	$gajiakhir = isset($data['gaji_akhir']) && !empty(trim($data['gaji_akhir']))
-		? htmlspecialchars($data['gaji_akhir'])
-		: '';
+    // LOGIKA GABUNGAN GAJI - DIPERBAIKI
+    $gajiakhir = isset($data['gaji_akhir']) && !empty(trim($data['gaji_akhir']))
+        ? htmlspecialchars($data['gaji_akhir'])
+        : '';
 
-	// Format gaji: jika ada gaji_akhir maka rentang, jika tidak maka satuan
-	if (!empty($gajiakhir)) {
-		$gaji = $gajiawal . ' - ' . $gajiakhir;
-	} else {
-		$gaji = $gajiawal; // Hanya gaji awal saja (satuan)
-	}
+    // Format gaji: jika ada gaji_akhir maka rentang, jika tidak maka satuan
+    if (!empty($gajiakhir)) {
+        $gaji = $gajiawal . ' - ' . $gajiakhir;
+    } else {
+        $gaji = $gajiawal; // Hanya gaji awal saja (satuan)
+    }
 
-	$query = "UPDATE lowongan SET 
+    $query = "UPDATE lowongan SET 
               judul = '$judul', 
               deskripsi = '$deskripsi', 
               persyaratan = '$persyaratan',
@@ -706,11 +708,12 @@ function editLoker($data)
               kpn_gaji_diberi = '$kpn_gaji_diberi', 
               tanggal_dibuka = '$tanggal_dibuka', 
               tanggal_ditutup = '$tanggal_ditutup', 
-              id_perusahaan = '$id_perusahaan' 
+              id_perusahaan = '$id_perusahaan',
+              status_kerjasama = '$status_kerjasama'
               WHERE id_lowongan = $id_lowongan";
-	mysqli_query($conn, $query);
+    mysqli_query($conn, $query);
 
-	return mysqli_affected_rows($conn);
+    return mysqli_affected_rows($conn);
 }
 
 // Function Logika Hapus loker
@@ -746,11 +749,43 @@ function hapusLoker($id)
 
 // Start Function Data Lamaran Alumni
 
-// Function Logika Hapus Lamaran
+// Function Logika Hapus Lamaran dengan penghapusan file CV
 function hapusLamaran($id)
 {
-	// Variable Scope / Lingkup Variabel
 	global $conn;
+
+	// Ambil data lamaran termasuk file CV sebelum dihapus
+	$query = mysqli_query($conn, "
+        SELECT lamaran.*, alumni.nama AS nama_siswa 
+        FROM lamaran 
+        JOIN alumni ON lamaran.id_siswa = alumni.id_alumni 
+        WHERE lamaran.id_lamaran = $id
+    ");
+
+	if (mysqli_num_rows($query) > 0) {
+		$lamaran = mysqli_fetch_assoc($query);
+
+		// Hapus file CV hanya jika ada dan bukan default value
+		if (!empty($lamaran['cv']) && $lamaran['cv'] !== 'Tidak Ada CV') {
+			$cv_path = "../../src/assets/persyaratan/cv/" . $lamaran['cv'];
+			if (file_exists($cv_path)) {
+				unlink($cv_path); // Hapus file CV dari folder
+			}
+		} else {
+			// Jika menggunakan sistem pencarian file berdasarkan nama (untuk data lama)
+			$nama_siswa_singkat = preg_replace('/[^a-zA-Z0-9]/', '_', strtolower($lamaran['nama_siswa']));
+			$allowed_ext = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+
+			foreach ($allowed_ext as $ext) {
+				$filename = "cv_" . $nama_siswa_singkat . "_" . $lamaran['id_lowongan'] . "." . $ext;
+				$filepath = "../../src/assets/persyaratan/cv/" . $filename;
+				if (file_exists($filepath)) {
+					unlink($filepath); // Hapus file CV dari folder
+					break;
+				}
+			}
+		}
+	}
 
 	// Jalankan query hapus data dari database
 	mysqli_query($conn, "DELETE FROM lamaran WHERE id_lamaran = $id");

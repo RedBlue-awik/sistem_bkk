@@ -80,10 +80,17 @@ function getLoker()
 {
     global $conn;
 
-    $query = "SELECT lowongan.*, perusahaan.nama_perusahaan, perusahaan.logo, perusahaan.alamat, perusahaan.bidang_usaha
+    $query = "SELECT lowongan.*,lowongan.status_kerjasama, perusahaan.nama_perusahaan, perusahaan.logo, perusahaan.alamat, perusahaan.bidang_usaha, perusahaan.email, perusahaan.telepon
               FROM lowongan 
               JOIN perusahaan ON lowongan.id_perusahaan = perusahaan.id_perusahaan 
-              ORDER BY lowongan.id_lowongan DESC";
+              WHERE tanggal_ditutup >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+
+    // Tambahkan filter kategori jika ada
+    if (!empty($kategoriFilter)) {
+        $query .= " AND LOWER(perusahaan.bidang_usaha) = LOWER('" . mysqli_real_escape_string($conn, $kategoriFilter) . "')";
+    }
+
+    $query .= " ORDER BY lowongan.id_lowongan DESC";
 
     $result = mysqli_query($conn, $query);
 
@@ -93,14 +100,13 @@ function getLoker()
         $gaji_minimal = isset($gaji_parts[0]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[0])) : 0;
         $gaji_maksimal = isset($gaji_parts[1]) ? str_replace(['.', ','], ['', '.'], trim($gaji_parts[1])) : $gaji_minimal;
 
-        // Format tampilan gaji dengan periode kepanjangan
-        $periode_gaji = formatPeriodeGaji($row['kpn_gaji_diberi']);
+        // Format tampilan gaji
         if ($gaji_minimal == $gaji_maksimal) {
-            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . '/ ' . $periode_gaji;
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . '/' . $row['kpn_gaji_diberi'];
         } else {
-            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . '/ ' . $periode_gaji;
+            $row['gaji_full'] = $row['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . '/' . $row['kpn_gaji_diberi'];
         }
-        
+
         // Ubah persyaratan ke array
         if (is_string($row['persyaratan'])) {
             $row['persyaratan'] = explode(',', $row['persyaratan']);
@@ -117,12 +123,17 @@ $daftarLoker = getLoker();
 
 if (isset($_GET['id_lowongan'])) {
     $id = intval($_GET['id_lowongan']);
-    $query = mysqli_query($conn, "SELECT lowongan.*, perusahaan.nama_perusahaan, perusahaan.logo, perusahaan.alamat, perusahaan.bidang_usaha
+    $query = mysqli_query($conn, "SELECT lowongan.*, perusahaan.nama_perusahaan, perusahaan.logo, perusahaan.alamat, perusahaan.bidang_usaha, perusahaan.telepon, perusahaan.email, lowongan.status_kerjasama
               FROM lowongan 
               JOIN perusahaan ON lowongan.id_perusahaan = perusahaan.id_perusahaan 
               WHERE lowongan.id_lowongan = $id");
     $data = mysqli_fetch_assoc($query);
-    
+
+    if (!$data) {
+        echo "Data lowongan tidak ditemukan.";
+        exit;
+    }
+
     // Proses format gaji untuk data detail
     if ($data) {
         $gaji_parts = explode('-', $data['gaji']);
@@ -136,7 +147,7 @@ if (isset($_GET['id_lowongan'])) {
         } else {
             $data['gaji_full'] = $data['mata_uang'] . ' ' . formatUangSingkat($gaji_minimal) . ' - ' . formatUangSingkat($gaji_maksimal) . ' /' . $periode_gaji;
         }
-        
+
         // Ubah persyaratan ke array untuk data detail
         if (is_string($data['persyaratan'])) {
             $data['persyaratan'] = explode(',', $data['persyaratan']);
@@ -167,8 +178,34 @@ function getCvFile($id_alumni, $id_lowongan)
     return null;
 }
 
+$statusKerjasama = $data['status_kerjasama'];
 $alamat = $data['alamat'];
 $hari_ini = strtotime(date('Y-m-d'));
+
+// Inisialisasi variabel untuk cek lamaran alumni
+$id_alumni = null;
+if (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni' && isset($_SESSION['id_pengguna'])) {
+    $id_user = $_SESSION['id_pengguna'];
+    // Ambil kode alumni dari user
+    $query_user = mysqli_query($conn, "SELECT kode_pengguna FROM user WHERE id_user = '$id_user'");
+    if ($query_user && mysqli_num_rows($query_user) > 0) {
+        $data_user = mysqli_fetch_assoc($query_user);
+        $kode_alumni = $data_user['kode_pengguna'];
+        // Ambil id_alumni
+        $query_alumni = mysqli_query($conn, "SELECT id_alumni FROM alumni WHERE kode_alumni = '$kode_alumni'");
+        if ($query_alumni && mysqli_num_rows($query_alumni) > 0) {
+            $data_alumni = mysqli_fetch_assoc($query_alumni);
+            $id_alumni = $data_alumni['id_alumni'];
+        }
+    }
+}
+
+// Cek apakah alumni sudah melamar lowongan ini
+$sudah_melamar = false;
+if ($id_alumni !== null) {
+    $cek_lamaran = mysqli_query($conn, "SELECT 1 FROM lamaran WHERE id_siswa = '$id_alumni' AND id_lowongan = '{$data['id_lowongan']}'");
+    $sudah_melamar = mysqli_num_rows($cek_lamaran) > 0;
+}
 ?>
 
 <!DOCTYPE html>
@@ -330,7 +367,16 @@ include '../../src/template/headers.php';
                                     <h4 class="fw-bold mb-1"><?= $data['nama_perusahaan'] ?></h4>
                                     <p class="text-muted mb-1"><?= $data['judul'] ?></p>
 
-                                    <div class="d-flex flex-wrap align-items-baseline gap-3 mt-3 flex-column info">
+
+                                    <div class="d-flex flex-wrap align-items-baseline gap-3 mt-2 flex-column info">
+                                        <!-- Badge Status Kerjasama -->
+                                        <span class="badge <?= $statusKerjasama == 'bekerja_sama' ? 'bg-success' : 'bg-danger' ?> p-2">
+                                            <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                                                <i class="fas fa-handshake me-2"></i>Bekerja Sama
+                                            <?php else : ?>
+                                                <i class="fas fa-ban me-2"></i>Tidak Bekerja Sama
+                                            <?php endif; ?>
+                                        </span>
                                         <span class="mapslink"><?= '<a class="linkMaps icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.200rem, 0); "  href="https://www.google.com/maps?q=' . urlencode($alamat) . '" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"> <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/> </svg>' . $alamat . '</a>'; ?></span>
                                         <span class="text-muted"><i class="bi bi-cash-stack" style="margin-right: .33rem;"></i><?= $data['gaji_full'] ?></span>
                                         <span class="text-muted"><i class="bi bi-building me-1"></i><?= $data['bidang_usaha'] ?></span>
@@ -353,7 +399,12 @@ include '../../src/template/headers.php';
                                         <?php elseif (strtotime($data['tanggal_dibuka']) > time()) : ?>
                                             <a href="./loker.php" class="btn btn-sm px-5 btn-primary">Cari Lamaran Lainnya</a>
                                         <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') : ?>
-                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $data['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
+                                            <?php if ($sudah_melamar) : ?>
+                                                <button class="btn btn-sm px-4 bg-success text-light">Sudah Melamar</button>
+                                            <?php else : ?>
+                                                <!-- PERBAIKAN: Gunakan data dari $data bukan $loker -->
+                                                <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $data['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
+                                            <?php endif; ?>
                                         <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
                                             <a href="../../logout.php" class="btn btn-sm btn-outline-primary">Khusus Alumni</a>
                                         <?php else : ?>
@@ -408,6 +459,14 @@ include '../../src/template/headers.php';
                                 $isTutup = strtotime($loker['tanggal_ditutup']) < time();
                                 $isBelumBuka = strtotime($loker['tanggal_dibuka']) > time();
                                 $alamat = $loker['alamat'];
+                                $statuskerjasama = $loker['status_kerjasama'];
+
+                                // Cek apakah alumni sudah melamar lowongan ini
+                                $sudah_melamar_loker = false;
+                                if ($id_alumni !== null) {
+                                    $cek_lamaran = mysqli_query($conn, "SELECT 1 FROM lamaran WHERE id_siswa = '$id_alumni' AND id_lowongan = '{$loker['id_lowongan']}'");
+                                    $sudah_melamar_loker = mysqli_num_rows($cek_lamaran) > 0;
+                                }
                             ?>
                                 <div class="col-12 col-sm-5 col-md-6 col-lg-5">
                                     <div data-id="<?= $loker['id_lowongan'] ?>" class="card-click card job-card h-100">
@@ -418,7 +477,16 @@ include '../../src/template/headers.php';
                                                 </span>
                                                 <span class="text-muted"><strong><?= $loker['gaji_full']; ?></strong></span>
                                             </div>
-                                            <div class="mb-3"><span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span></div>
+                                            <div class="mb-3"><span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span>
+                                                <!-- Badge Status Kerjasama -->
+                                                <span class="badge <?= $statuskerjasama == 'bekerja_sama' ? 'bg-success' : 'bg-danger' ?> p-2">
+                                                    <?php if ($statuskerjasama == 'bekerja_sama') : ?>
+                                                        <i class="fas fa-handshake"></i>
+                                                    <?php else : ?>
+                                                        <i class="fas fa-ban"></i>
+                                                    <?php endif; ?>
+                                                </span>
+                                            </div>
                                             <ul class="list-unstyled">
                                                 <li class="mb-1"><strong>Nama Perusahaan:</strong><br><span class="badge bg-primary"> <?= $loker['nama_perusahaan']; ?> </span></li>
                                             </ul>
@@ -457,7 +525,12 @@ include '../../src/template/headers.php';
                                                     <?php elseif ($isBelumBuka) : ?>
                                                         <a href="./loker.php" class="btn btn-xs btn-primary" style="font-size:0.85rem;">Lainnya</a>
                                                     <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'alumni') : ?>
-                                                        <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
+                                                        <?php if ($sudah_melamar_loker) : ?>
+                                                            <button class="btn btn-sm px-4 bg-success text-light" disabled>Sudah Lamar</button>
+                                                        <?php else : ?>
+                                                            <!-- PERBAIKAN: Gunakan data dari $loker -->
+                                                            <a href="" data-bs-toggle="modal" data-bs-target="#modalSyarat<?= $loker['id_lowongan']; ?>" class="btn btn-sm px-4 btn-outline-primary">Lamar</a>
+                                                        <?php endif; ?>
                                                     <?php elseif (isset($_SESSION['level']) && $_SESSION['level'] === 'admin') : ?>
                                                         <a href="../../logout.php" class="btn btn-sm btn-outline-primary">Khusus Alumni</a>
                                                     <?php else : ?>
@@ -485,32 +558,326 @@ include '../../src/template/headers.php';
 
     <?php include '../../src/template/modalForm.php'; ?>
 
-    <?php foreach ($daftarLoker as $loker) : ?>
-        <!--begin::Modal Syarat -->
+    <!-- Modal untuk lowongan utama -->
+    <div class="modal fade" id="modalSyarat<?= $data['id_lowongan']; ?>" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <?php
+            $statusKerjasama = $data['status_kerjasama'];
+            $formAttributes = $statusKerjasama == 'bekerja_sama' ? 'enctype="multipart/form-data"' : '';
+            ?>
+
+            <form action="../../src/config/proses-lamaran.php?id=<?= $data['id_lowongan'] ?>" method="POST" <?= $formAttributes ?>>
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Lamar Lowongan - <?= htmlspecialchars($data['judul']) ?>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_lowongan" value="<?= $data['id_lowongan']; ?>">
+                        <input type="hidden" name="id_alumni" value="<?= $_SESSION['id_pengguna'] ?>">
+
+                        <!-- Info Status Kerjasama -->
+                        <div class="alert <?= $statusKerjasama == 'bekerja_sama' ? 'alert-success' : 'alert-warning' ?> mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas <?= $statusKerjasama == 'bekerja_sama' ? 'fa-handshake' : 'fa-building' ?> fa-2x me-3"></i>
+                                <div>
+                                    <h6 class="alert-heading mb-1">
+                                        <?= $statusKerjasama == 'bekerja_sama' ? 'Bekerja Sama dengan Sekolah' : 'Tidak Bekerja Sama' ?>
+                                    </h6>
+                                    <p class="mb-0 small">
+                                        <?= $statusKerjasama == 'bekerja_sama'
+                                            ? 'Lamaran Anda akan diproses melalui sistem sekolah. Upload CV Anda di bawah ini.'
+                                            : 'Untuk lowongan ini, Anda perlu mengirimkan lamaran langsung ke perusahaan.' ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                            <!-- Untuk lowongan bekerja sama - upload CV -->
+                            <div class="mb-4">
+                                <label for="cv_<?= $data['id_lowongan']; ?>" class="form-label fw-semibold">
+                                    <i class="fas fa-file-upload me-2 text-primary"></i>
+                                    Upload CV <span class="text-danger">*</span>
+                                </label>
+                                <input type="file" name="cv" id="cv_<?= $data['id_lowongan']; ?>" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1 text-info"></i>
+                                    Format: PDF, Word, Excel (Maks. 100MB)
+                                </div>
+                            </div>
+                        <?php else : ?>
+                            <!-- Untuk lowongan tidak bekerja sama - informasi kontak perusahaan -->
+                            <div class="mb-4">
+                                <div class="card border-warning shadow-sm">
+                                    <div class="card-header bg-warning text-dark d-flex align-items-center">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Kirim Lamaran Langsung ke Perusahaan</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text text-muted mb-3">
+                                            Silakan hubungi perusahaan melalui kontak di bawah ini untuk mengirimkan CV dan dokumen lamaran Anda.
+                                        </p>
+
+                                        <div class="row g-3">
+                                            <!-- Informasi Perusahaan -->
+                                            <div class="col-12">
+                                                <div class="d-flex align-items-start p-3 bg-light rounded">
+                                                    <i class="fas fa-building fa-lg me-3 mt-4 text-primary mt-1"></i>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1"><?= htmlspecialchars($data['nama_perusahaan']) ?></h6>
+                                                        <p class="text-muted mb-0"><?= htmlspecialchars($data['bidang_usaha']) ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Alamat -->
+                                            <div class="col-12">
+                                                <div class="d-flex align-items-start p-3 bg-light rounded">
+                                                    <i class="fas fa-map-marker-alt fa-lg me-3 mt-4 text-danger mt-1"></i>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1">Alamat Perusahaan</h6>
+                                                        <a href="https://www.google.com/maps?q=<?= urlencode($data['alamat']) ?>" target="_blank" class="linkMaps">
+                                                            <?= htmlspecialchars($data['alamat']) ?>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Email -->
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-start p-3 bg-light rounded h-100">
+                                                    <i class="fas fa-envelope fa-lg me-3 mt-4 text-success mt-1"></i>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1">Email</h6>
+                                                        <p>
+                                                            <?= htmlspecialchars($data['email']) ?>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Telepon -->
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-start p-3 bg-light rounded h-100">
+                                                    <i class="fas fa-phone fa-lg me-3 mt-4 text-info mt-1"></i>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-1">Telepon</h6>
+                                                        <p>
+                                                            <?= htmlspecialchars($data['telepon']) ?>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tips -->
+                                        <div class="mt-4 p-3 bg-info bg-opacity-10 rounded">
+                                            <h6 class="fw-bold text-info mb-2">
+                                                <i class="fas fa-lightbulb me-2"></i>Tips Melamar:
+                                            </h6>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Siapkan CV dan surat lamaran yang profesional</li>
+                                                <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Hubungi perusahaan via telepon/email terlebih dahulu</li>
+                                                <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Konfirmasi proses rekrutmen yang berlaku</li>
+                                                <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i> Follow up lamaran setelah 3-5 hari</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Konfirmasi -->
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirm<?= $data['id_lowongan'] ?>" required>
+                                <label class="form-check-label" for="confirm<?= $data['id_lowongan'] ?>">
+                                    Saya telah memahami bahwa untuk lowongan ini perlu mengirim lamaran langsung ke perusahaan
+                                </label>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Batal
+                        </button>
+                        <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                            <button type="submit" name="kirim" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Kirim Lamaran
+                            </button>
+                        <?php else : ?>
+                            <button type="submit" name="kirim" class="btn btn-success">
+                                <i class="fas fa-check-circle me-1"></i> Konfirmasi
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal untuk lowongan lainnya -->
+    <?php foreach ($saranLoker as $loker) : ?>
         <div class="modal fade" id="modalSyarat<?= $loker['id_lowongan']; ?>" tabindex="-1">
-            <div class="modal-dialog">
-                <form action="../../src/config/proses-lamaran.php" method="POST" enctype="multipart/form-data">
+            <div class="modal-dialog modal-lg">
+                <?php
+                $statusKerjasama = $loker['status_kerjasama'];
+                $formAttributes = $statusKerjasama == 'bekerja_sama' ? 'enctype="multipart/form-data"' : '';
+                ?>
+
+                <form action="../../src/config/proses-lamaran.php?id=<?= $loker['id_lowongan'] ?>" method="POST" <?= $formAttributes ?>>
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Lamar Lowongan</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Lamar Lowongan - <?= htmlspecialchars($loker['judul']) ?>
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="id_lowongan" value="<?= $loker['id_lowongan']; ?>">
                             <input type="hidden" name="id_alumni" value="<?= $_SESSION['id_pengguna'] ?>">
-                            <div class="mb-3">
-                                <label for="cv">Upload CV</label>
-                                <input type="file" name="cv" class="form-control" required>
+
+                            <!-- Info Status Kerjasama -->
+                            <div class="alert <?= $statusKerjasama == 'bekerja_sama' ? 'alert-success' : 'alert-warning' ?> mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas <?= $statusKerjasama == 'bekerja_sama' ? 'fa-handshake' : 'fa-building' ?> fa-2x me-3"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">
+                                            <?= $statusKerjasama == 'bekerja_sama' ? 'Bekerja Sama dengan Sekolah' : 'Tidak Bekerja Sama' ?>
+                                        </h6>
+                                        <p class="mb-0 small">
+                                            <?= $statusKerjasama == 'bekerja_sama'
+                                                ? 'Lamaran Anda akan diproses melalui sistem sekolah. Upload CV Anda di bawah ini.'
+                                                : 'Untuk lowongan ini, Anda perlu mengirimkan lamaran langsung ke perusahaan.' ?>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
+
+                            <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                                <!-- Untuk lowongan bekerja sama - upload CV -->
+                                <div class="mb-4">
+                                    <label for="cv_<?= $loker['id_lowongan']; ?>" class="form-label fw-semibold">
+                                        <i class="fas fa-file-upload me-2 text-primary"></i>
+                                        Upload CV <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" name="cv" id="cv_<?= $loker['id_lowongan']; ?>" class="form-control" required accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1 text-info"></i>
+                                        Format: PDF, Word, Excel (Maks. 100MB)
+                                    </div>
+                                </div>
+                            <?php else : ?>
+                                <!-- Untuk lowongan tidak bekerja sama - informasi kontak perusahaan -->
+                                <div class="mb-4">
+                                    <div class="card border-warning shadow-sm">
+                                        <div class="card-header bg-warning text-dark d-flex align-items-center">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            <strong>Kirim Lamaran Langsung ke Perusahaan</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text text-muted mb-3">
+                                                Silakan hubungi perusahaan melalui kontak di bawah ini untuk mengirimkan CV dan dokumen lamaran Anda.
+                                            </p>
+
+                                            <div class="row g-3">
+                                                <!-- Informasi Perusahaan -->
+                                                <div class="col-12">
+                                                    <div class="d-flex align-items-start p-3 bg-light rounded">
+                                                        <i class="fas fa-building fa-lg me-3 mt-4 text-primary mt-1"></i>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-1"><?= htmlspecialchars($loker['nama_perusahaan']) ?></h6>
+                                                            <p class="text-muted mb-0"><?= htmlspecialchars($loker['bidang_usaha']) ?></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Alamat -->
+                                                <div class="col-12">
+                                                    <div class="d-flex align-items-start p-3 bg-light rounded">
+                                                        <i class="fas fa-map-marker-alt fa-lg me-3 mt-4 text-danger mt-1"></i>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-1">Alamat Perusahaan</h6>
+                                                            <a href="https://www.google.com/maps?q=<?= urlencode($loker['alamat']) ?>" target="_blank" class="linkMaps">
+                                                                <?= htmlspecialchars($loker['alamat']) ?>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Email -->
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start p-3 bg-light rounded h-100">
+                                                        <i class="fas fa-envelope fa-lg me-3 mt-4 text-success mt-1"></i>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-1">Email</h6>
+                                                            <p>
+                                                                <?= htmlspecialchars($loker['email']) ?>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Telepon -->
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start p-3 bg-light rounded h-100">
+                                                        <i class="fas fa-phone fa-lg me-3 mt-4 text-info mt-1"></i>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-1">Telepon</h6>
+                                                            <p>
+                                                                <?= htmlspecialchars($loker['telepon']) ?>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Tips -->
+                                            <div class="mt-4 p-3 bg-info bg-opacity-10 rounded">
+                                                <h6 class="fw-bold text-info mb-2">
+                                                    <i class="fas fa-lightbulb me-2"></i>Tips Melamar:
+                                                </h6>
+                                                <ul class="list-unstyled mb-0 small">
+                                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Siapkan CV dan surat lamaran yang profesional</li>
+                                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Hubungi perusahaan via telepon/email terlebih dahulu</li>
+                                                    <li class="mb-1"><i class="fas fa-check-circle text-success me-2"></i> Konfirmasi proses rekrutmen yang berlaku</li>
+                                                    <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i> Follow up lamaran setelah 3-5 hari</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Konfirmasi -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="confirm<?= $loker['id_lowongan'] ?>" required>
+                                    <label class="form-check-label" for="confirm<?= $loker['id_lowongan'] ?>">
+                                        Saya telah memahami bahwa untuk lowongan ini perlu mengirim lamaran langsung ke perusahaan
+                                    </label>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" name="kirim" class="btn btn-primary">Kirim Lamaran</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i> Batal
+                            </button>
+                            <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                                <button type="submit" name="kirim" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-1"></i> Kirim Lamaran
+                                </button>
+                            <?php else : ?>
+                                <button type="submit" name="kirim" class="btn btn-success">
+                                    <i class="fas fa-check-circle me-1"></i> Konfirmasi
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <!-- End::Modal Syarat -->
     <?php endforeach; ?>
 
     <!-- Script -->

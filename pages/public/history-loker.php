@@ -10,38 +10,6 @@ require '../../src/functions.php';
 // Tambahkan ini agar modal edit bisa menampilkan nama perusahaan
 $daftarperusahaan = getPerusahaan();
 
-// Cek apakah tombol tambah di klik
-if (isset($_POST['tambah'])) {
-    if (tambahLoker($_POST) > 0) {
-        // SweetAlert untuk berhasil
-        echo "
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Data Lowongan Kerja berhasil ditambahkan!',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.href = '../../pages/public/history-loker.php';
-                });
-            });
-        </script>";
-    } else {
-        echo "
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Data Lowongan Kerja gagal ditambahkan!',
-                    confirmButtonText: 'OK'
-                });
-            });
-        </script>";
-    }
-}
-
 // Cek apakah tombol edit di klik
 if (isset($_POST['edit'])) {
     if (editLoker($_POST) !== false) {
@@ -250,6 +218,111 @@ include '../../src/template/headers.php'
             max-width: 100%;
         }
     }
+
+    /* Filter Sidebar Styles */
+    .filter-sidebar {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 350px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1060;
+        transition: right 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-sidebar.show {
+        right: 0;
+    }
+
+    .filter-sidebar-header {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        background: #f8f9fa;
+    }
+
+    .filter-sidebar-body {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    .filter-sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+    .filter-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .filter-options {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+    }
+
+    .filter-options .form-check {
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-options .form-check:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1055;
+        display: none;
+    }
+
+    .filter-sidebar-overlay.show {
+        display: block;
+    }
+
+    /* Dropdown filter styles */
+    #mainFilterDropdown .dropdown-menu {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Active filters badge */
+    #activeFilterCount {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .filter-sidebar {
+            width: 300px;
+        }
+
+        .filter-controls .d-flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
 </style>
 
 </head>
@@ -322,23 +395,137 @@ include '../../src/template/headers.php'
                     </div>
                     <!--end::Row-->
 
-                    <!--begin::Search & PerPage Controls-->
+                    <!--begin::Search & Filter Controls-->
                     <div class="row mb-2 mt-4 align-items-center g-2">
-                        <div class="col-12 col-md-8">
-                            <input type="search" id="searchLoker" class="form-control search-clearable" style="min-width:180px;" placeholder="Cari loker, perusahaan, bidang..." autocomplete="off">
+                        <div class="col-12 col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" id="searchLoker" class="form-control search-clearable border-start-0" placeholder="Cari loker, perusahaan, bidang..." autocomplete="off">
+                            </div>
                         </div>
-                        <div class="perP col-12 col-md-4 mt-2 mt-md-0 d-flex justify-content-md-end">
-                            <select id="perPage" class="form-select" style="max-width: 180px;">
-                                <option value="3">3 data</option>
-                                <option value="6">6 data</option>
-                                <option value="12">12 data</option>
-                                <option value="24">24 data</option>
-                                <option value="48">48 data</option>
-                                <option value="100">100 data</option>
-                            </select>
+                        <div class="col-6 col-md-2">
+                            <div class="d-flex align-items-center">
+                                <!-- Per Page Select - DI LUAR FILTER -->
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="perPageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-list-ol me-2"></i>
+                                        <span id="perPageText">6 data</span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="perPageDropdown">
+                                        <li><a class="dropdown-item per-page-option" href="#" data-value="3">3 data</a></li>
+                                        <li><a class="dropdown-item per-page-option active" href="#" data-value="6">6 data</a></li>
+                                        <li><a class="dropdown-item per-page-option" href="#" data-value="12">12 data</a></li>
+                                        <li><a class="dropdown-item per-page-option" href="#" data-value="24">24 data</a></li>
+                                        <li><a class="dropdown-item per-page-option" href="#" data-value="48">48 data</a></li>
+                                        <li><a class="dropdown-item per-page-option" href="#" data-value="100">100 data</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center">
+                                <!-- Toggle Filter Sidebar -->
+                                <button class="btn btn-outline-primary d-flex align-items-center" id="toggleFilterSidebar">
+                                    <i class="fas fa-filter me-2"></i>Panel Filter
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <!--end::Search & PerPage Controls-->
+                    <!--end::Search & Filter Controls-->
+                    <!-- Filter Sidebar -->
+                    <div id="filterSidebar" class="filter-sidebar">
+                        <div class="filter-sidebar-header">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="fas fa-sliders-h me-2"></i>Panel Filter
+                            </h6>
+                            <button type="button" class="btn-close" id="closeFilterSidebar"></button>
+                        </div>
+
+                        <div class="filter-sidebar-body">
+                            <!-- Status Kerjasama -->
+                            <div class="filter-group">
+                                <label class="filter-label">
+                                    <i class="fas fa-handshake me-2 text-success"></i>Status Kerjasama
+                                </label>
+                                <div class="filter-options">
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-field-sidebar" type="radio" name="filterKerjasamaSidebar" id="kerjasamaAll" value="all" checked>
+                                        <label class="form-check-label" for="kerjasamaAll">Semua Status</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-field-sidebar" type="radio" name="filterKerjasamaSidebar" id="kerjasamaYes" value="bekerja_sama">
+                                        <label class="form-check-label" for="kerjasamaYes">
+                                            <i class="fas fa-handshake text-success me-1"></i>Bekerja Sama
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input filter-field-sidebar" type="radio" name="filterKerjasamaSidebar" id="kerjasamaNo" value="tidak_bekerja_sama">
+                                        <label class="form-check-label" for="kerjasamaNo">
+                                            <i class="fas fa-ban text-secondary me-1"></i>Tidak Bekerja Sama
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bidang Usaha -->
+                            <div class="filter-group">
+                                <label class="filter-label">
+                                    <i class="fas fa-industry me-2 text-info"></i>Bidang Usaha
+                                </label>
+                                <select class="form-select form-select-sm filter-field-sidebar" id="filterBidangSidebar">
+                                    <option value="all">Semua Bidang</option>
+                                    <?php
+                                    $bidangQuery = mysqli_query($conn, "SELECT DISTINCT bidang_usaha FROM perusahaan WHERE bidang_usaha != '' ORDER BY bidang_usaha");
+                                    while ($bidang = mysqli_fetch_assoc($bidangQuery)) {
+                                        echo '<option value="' . htmlspecialchars(strtolower($bidang['bidang_usaha'])) . '">' . htmlspecialchars($bidang['bidang_usaha']) . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+
+                            <!-- Perusahaan -->
+                            <div class="filter-group">
+                                <label class="filter-label">
+                                    <i class="fas fa-building me-2 text-warning"></i>Perusahaan
+                                </label>
+                                <select class="form-select form-select-sm filter-field-sidebar" id="filterPerusahaanSidebar">
+                                    <option value="all">Semua Perusahaan</option>
+                                    <?php
+                                    $perusahaanQuery = mysqli_query($conn, "SELECT id_perusahaan, nama_perusahaan FROM perusahaan ORDER BY nama_perusahaan");
+                                    while ($perusahaan = mysqli_fetch_assoc($perusahaanQuery)) {
+                                        echo '<option value="' . $perusahaan['id_perusahaan'] . '">' . htmlspecialchars($perusahaan['nama_perusahaan']) . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="filter-sidebar-footer">
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100 mb-2" id="resetAllFiltersSidebar">
+                                <i class="fas fa-redo me-1"></i>Reset Semua Filter
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success w-100" id="applyFiltersSidebar">
+                                <i class="fas fa-check me-1"></i>Terapkan Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overlay untuk sidebar -->
+                    <div class="filter-sidebar-overlay" id="filterSidebarOverlay"></div>
+
+                    <!-- Filter Active Indicator -->
+                    <div id="activeFilters" class="row mb-3" style="display: none;">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <small class="text-muted me-2">Filter Aktif:</small>
+                                <div id="filterTags"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Search & Filter Controls-->
+                    <div id="kategoriIndicator" style="display: none;"></div>
                 </div>
                 <!--end::Container-->
             </div>
@@ -353,17 +540,32 @@ include '../../src/template/headers.php'
                         ?>
 
                         <div class="row g-3 mt-3" id="lokerCards">
+                            <!-- Results Counter -->
+                            <div class="row mb-1 mt-3">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted" id="resultsCount">Memuat lowongan...</small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Klik card untuk melihat detail
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Daftar Loker -->
                             <?php
                             foreach ($historyLoker as $loker) :
                                 $alamat = $loker['alamat'];
                                 $isTutup = strtotime($loker['tanggal_ditutup']) < time();
                                 $isBelumBuka = strtotime($loker['tanggal_dibuka']) > time();
+                                $statusKerjasama = $loker['status_kerjasama'];
                             ?>
                                 <div class="col-sm-6 col-xl-4 loker-card"
                                     data-judul="<?= htmlspecialchars(strtolower($loker['judul'])) ?>"
                                     data-perusahaan="<?= htmlspecialchars(strtolower($loker['nama_perusahaan'])) ?>"
-                                    data-bidang="<?= htmlspecialchars(strtolower($loker['bidang_usaha'])) ?>">
+                                    data-bidang="<?= htmlspecialchars(strtolower($loker['bidang_usaha'])) ?>"
+                                    data-kerjasama="<?= $statusKerjasama ?>"
+                                    data-perusahaan-id="<?= $loker['id_perusahaan'] ?>">
                                     <div data-id="<?= $loker['id_lowongan'] ?>" class="card-click card job-card h-100">
                                         <div class="card-body d-flex flex-column">
                                             <div class="d-flex justify-content-between">
@@ -372,7 +574,17 @@ include '../../src/template/headers.php'
                                                 </span>
                                                 <span class="text-muted"><strong><?= $loker['gaji_full']; ?></strong></span>
                                             </div>
-                                            <div class="mb-3 mt-n1"><span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span></div>
+                                            <div class="mb-3 mt-n1">
+                                                <span class="badge bg-success p-2 text-uppercase"><?= $loker['bidang_usaha'] ?></span>
+                                                <!-- Badge Status Kerjasama -->
+                                                <span class="badge <?= $statusKerjasama == 'bekerja_sama' ? 'bg-success' : 'bg-danger' ?> p-2">
+                                                    <?php if ($statusKerjasama == 'bekerja_sama') : ?>
+                                                        <i class="fas fa-handshake"></i>
+                                                    <?php else : ?>
+                                                        <i class="fas fa-ban"></i>
+                                                    <?php endif; ?>
+                                                </span>
+                                            </div>
                                             <ul class="list-unstyled flex-grow-1">
                                                 <li class="mb-2"><strong>Nama Perusahaan:</strong><br><span class="badge bg-primary"> <?= $loker['nama_perusahaan']; ?> </span></li>
                                                 <li class="mb-2"><strong>Persyaratan:</strong>
@@ -495,6 +707,15 @@ include '../../src/template/headers.php'
                                         <input id="judul" type="judul" name="judul" class="form-control" placeholder="" value="<?= $loker['judul'] ?>" autocomplete="off" />
                                         <label for="judul" class="form-label">Judul</label>
                                     </div>
+                                    <div class="form-floating ms-1">
+                                        <select class="form-control" name="status_kerjasama" id="status_kerjasama<?= $loker['id_lowongan']; ?>" required>
+                                            <option value="" selected disabled>Pilih Status Loker</option>
+                                            <option value="tidak_bekerja_sama" <?= $loker['status_kerjasama'] == 'tidak_bekerja_sama' ? 'selected' : '' ?>>Tidak Bekerja Sama</option>
+                                            <option value="bekerja_sama" <?= $loker['status_kerjasama'] == 'bekerja_sama' ? 'selected' : '' ?>>Bekerja Sama</option>
+                                        </select>
+                                        <label for="status_kerjasama<?= $loker['id_lowongan']; ?>" class="form-label">Status Loker</label>
+                                    </div>
+                                    <div class="input-group-text px-3"><span class="fas fa-handshake fa-lg"></span></div>
                                 </div>
                                 <div class="input-group my-3">
                                     <button class="btn btn-outline-secondary dropdown-toggle fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="currencyType<?= $loker['id_lowongan']; ?>">
@@ -832,91 +1053,284 @@ include '../../src/template/headers.php'
 
     <script>
         $(function() {
-            // --- Search & Clear Button ---
-            $('#searchLoker').on('input search', function() {
-                filterAndPaginate();
-            });
-            // Optional: clear on native X click (for browsers that don't fire 'input' on clear)
-            $('#searchLoker').on('search', function() {
-                filterAndPaginate();
-            });
+            // State management
+            let filterState = {
+                search: '',
+                kerjasama: 'all',
+                bidang: 'all',
+                perusahaan: 'all',
+                perPage: 6,
+                currentPage: 1
+            };
 
-            // --- Per Page Dropdown ---
-            $('#perPage').on('change', function() {
+            // Initialize
+            function init() {
+                bindEvents();
+                updateFilterCount();
                 filterAndPaginate();
-            });
+            }
 
-            // --- Pagination Click ---
-            $('#paginationLoker').on('click', 'li.page-item:not(.disabled) a', function(e) {
-                e.preventDefault();
-                let page = $(this).data('page');
-                if (page !== undefined) {
-                    window.currentPage = page;
+            // Bind events
+            function bindEvents() {
+                // Search input
+                $('#searchLoker').on('input search', function() {
+                    filterState.search = $(this).val().toLowerCase();
+                    filterState.currentPage = 1;
                     filterAndPaginate();
+                });
+
+                // Dropdown filter changes
+                $('.filter-field').on('change', function() {
+                    updateFilterState();
+                });
+
+                // Sidebar filter changes
+                $('.filter-field-sidebar').on('change', function() {
+                    updateFilterState();
+                });
+
+                // Per page options (YANG DI LUAR)
+                $('.per-page-option').on('click', function(e) {
+                    e.preventDefault();
+                    $('.per-page-option').removeClass('active');
+                    $(this).addClass('active');
+                    filterState.perPage = parseInt($(this).data('value'));
+                    filterState.currentPage = 1;
+                    updatePerPageText();
+                    filterAndPaginate();
+                });
+
+                // Apply filters (dropdown)
+                $('#applyFilters').on('click', function() {
+                    $('.dropdown-menu').removeClass('show');
+                    filterState.currentPage = 1;
+                    filterAndPaginate();
+                });
+
+                // Apply filters (sidebar)
+                $('#applyFiltersSidebar').on('click', function() {
+                    hideFilterSidebar();
+                    filterState.currentPage = 1;
+                    filterAndPaginate();
+                });
+
+                // Reset filters (dropdown)
+                $('#resetAllFilters').on('click', function() {
+                    resetFilters();
+                    $('.dropdown-menu').removeClass('show');
+                });
+
+                // Reset filters (sidebar)
+                $('#resetAllFiltersSidebar').on('click', function() {
+                    resetFilters();
+                });
+
+                // Toggle filter sidebar
+                $('#toggleFilterSidebar').on('click', function() {
+                    showFilterSidebar();
+                });
+
+                // Close filter sidebar
+                $('#closeFilterSidebar').on('click', function() {
+                    hideFilterSidebar();
+                });
+
+                // Close sidebar when clicking overlay
+                $('#filterSidebarOverlay').on('click', function() {
+                    hideFilterSidebar();
+                });
+
+                // Pagination
+                $('#paginationLoker').on('click', 'li.page-item:not(.disabled) a', function(e) {
+                    e.preventDefault();
+                    let page = $(this).data('page');
+                    if (page !== undefined) {
+                        filterState.currentPage = page;
+                        filterAndPaginate();
+                    }
+                });
+            }
+
+            // Update filter state from form fields
+            function updateFilterState() {
+                // From dropdown
+                filterState.kerjasama = $('#filterKerjasama').val();
+                filterState.bidang = $('#filterBidang').val();
+                filterState.perusahaan = $('#filterPerusahaan').val();
+
+                // From sidebar
+                filterState.kerjasama = $('input[name="filterKerjasamaSidebar"]:checked').val() || filterState.kerjasama;
+                filterState.bidang = $('#filterBidangSidebar').val() || filterState.bidang;
+                filterState.perusahaan = $('#filterPerusahaanSidebar').val() || filterState.perusahaan;
+
+                updateFilterCount();
+            }
+
+            // Update per page text
+            function updatePerPageText() {
+                $('#perPageText').text(filterState.perPage + ' data');
+            }
+
+            // Update active filter count
+            function updateFilterCount() {
+                let count = 0;
+                if (filterState.kerjasama !== 'all') count++;
+                if (filterState.bidang !== 'all') count++;
+                if (filterState.perusahaan !== 'all') count++;
+
+                $('#activeFilterCount').text(count);
+
+                // Update button text based on active filters
+                if (count > 0) {
+                    $('#toggleFilterSidebar').html('<i class="fas fa-filter me-2"></i>Panel Filter (' + count + ')');
+                    $('#mainFilterDropdown').html('<i class="fas fa-sliders-h me-2"></i>Filter Detail <span class="badge bg-primary ms-2">' + count + '</span>');
+                } else {
+                    $('#toggleFilterSidebar').html('<i class="fas fa-filter me-2"></i>Panel Filter');
+                    $('#mainFilterDropdown').html('<i class="fas fa-sliders-h me-2"></i>Filter Detail <span class="badge bg-primary ms-2">0</span>');
                 }
-            });
+            }
 
-            // --- Filtering, Pagination, and Rendering ---
-            window.currentPage = 1;
+            // Show filter sidebar
+            function showFilterSidebar() {
+                $('#filterSidebar').addClass('show');
+                $('#filterSidebarOverlay').addClass('show');
+                $('body').css('overflow', 'hidden');
+            }
 
+            // Hide filter sidebar
+            function hideFilterSidebar() {
+                $('#filterSidebar').removeClass('show');
+                $('#filterSidebarOverlay').removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+
+            // Reset all filters
+            function resetFilters() {
+                // Reset form fields
+                $('#searchLoker').val('');
+                $('#filterKerjasama').val('all');
+                $('#filterBidang').val('all');
+                $('#filterPerusahaan').val('all');
+
+                $('input[name="filterKerjasamaSidebar"][value="all"]').prop('checked', true);
+                $('#filterBidangSidebar').val('all');
+                $('#filterPerusahaanSidebar').val('all');
+
+                // Reset per page to default (tapi tetap di 6, tidak direset)
+                $('.per-page-option').removeClass('active');
+                $('.per-page-option[data-value="6"]').addClass('active');
+                filterState.perPage = 6;
+                updatePerPageText();
+
+                // Reset state (kecuali perPage)
+                filterState.search = '';
+                filterState.kerjasama = 'all';
+                filterState.bidang = 'all';
+                filterState.perusahaan = 'all';
+                filterState.currentPage = 1;
+
+                updateFilterCount();
+                filterAndPaginate();
+            }
+
+            // Main filter function
             function filterAndPaginate() {
-                let search = $('#searchLoker').val().toLowerCase();
-                let perPage = parseInt($('#perPage').val());
                 let $cards = $('#lokerCards .loker-card');
                 let $adminCard = $('#lokerCards .loker-card-admin');
                 let filtered = [];
 
                 $cards.each(function() {
                     let $el = $(this);
-                    let judul = $el.data('judul');
-                    let perusahaan = $el.data('perusahaan');
-                    let bidang = $el.data('bidang');
-                    if (
-                        search === '' ||
-                        (judul && judul.includes(search)) ||
-                        (perusahaan && perusahaan.includes(search)) ||
-                        (bidang && bidang.includes(search))
-                    ) {
+                    let judul = $el.data('judul') || '';
+                    let perusahaan = $el.data('perusahaan') || '';
+                    let bidang = $el.data('bidang') || '';
+                    let kerjasama = $el.data('kerjasama') || '';
+                    let idPerusahaan = $el.data('perusahaan-id') || '';
+
+                    // Search filter
+                    let matchSearch = !filterState.search ||
+                        judul.includes(filterState.search) ||
+                        perusahaan.includes(filterState.search) ||
+                        bidang.includes(filterState.search);
+
+                    // Kerjasama filter
+                    let matchKerjasama = filterState.kerjasama === 'all' ||
+                        kerjasama === filterState.kerjasama;
+
+                    // Bidang filter
+                    let matchBidang = filterState.bidang === 'all' ||
+                        bidang.includes(filterState.bidang);
+
+                    // Perusahaan filter
+                    let matchPerusahaan = filterState.perusahaan === 'all' ||
+                        idPerusahaan == filterState.perusahaan;
+
+                    if (matchSearch && matchKerjasama && matchBidang && matchPerusahaan) {
                         filtered.push($el);
                     }
                 });
 
-                // Pagination
                 let total = filtered.length;
-                let totalPages = Math.ceil(total / perPage) || 1;
-                if (window.currentPage > totalPages) window.currentPage = totalPages;
-                let start = (window.currentPage - 1) * perPage;
-                let end = start + perPage;
+                let totalPages = Math.ceil(total / filterState.perPage) || 1;
+                if (filterState.currentPage > totalPages) filterState.currentPage = 1;
 
-                // Hide all, then show filtered & paginated
+                let start = (filterState.currentPage - 1) * filterState.perPage;
+                let end = start + filterState.perPage;
+
+                // Hide all cards first
                 $cards.hide();
-                if ($adminCard.length) $adminCard.show(); // always show admin add card
+                if ($adminCard.length) $adminCard.show();
+
+                // Show filtered cards
                 filtered.forEach(function($el, idx) {
                     if (idx >= start && idx < end) $el.show();
                 });
 
-                // Tampilkan pesan jika tidak ada loker ditemukan
+                // Show/hide not found message
                 if (filtered.length === 0) {
                     $('#notFoundLoker').show();
                 } else {
                     $('#notFoundLoker').hide();
                 }
 
+                // Update results counter
+                updateResultsCounter(filtered.length, total);
+
                 // Render pagination
-                renderPagination(window.currentPage, totalPages);
+                renderPagination(filterState.currentPage, totalPages);
             }
 
+            // Update results counter
+            function updateResultsCounter(shown, total) {
+                let counterText = '';
+                if (total === 0) {
+                    counterText = 'Tidak ada lowongan ditemukan';
+                } else if (shown === total) {
+                    counterText = `Terdapat ${total} lowongan`;
+                } else {
+                    let start = (filterState.currentPage - 1) * filterState.perPage + 1;
+                    let end = Math.min(start + filterState.perPage - 1, total);
+                    counterText = `Terdapat ${start}-${end} dari ${total} lowongan`;
+                }
+                $('#resultsCount').text(counterText);
+            }
+
+            // Render pagination
             function renderPagination(current, total) {
                 let $ul = $('#paginationLoker');
                 $ul.empty();
+
                 if (total <= 1) return;
 
+                // Previous button
                 let prev = `<li class="page-item${current === 1 ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current - 1}" tabindex="-1">&laquo;</a>
+                <a class="page-link" href="#" data-page="${current - 1}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
             </li>`;
                 $ul.append(prev);
 
-                // Show max 5 pages
+                // Page numbers
                 let start = Math.max(1, current - 2);
                 let end = Math.min(total, start + 4);
                 if (end - start < 4) start = Math.max(1, end - 4);
@@ -927,14 +1341,17 @@ include '../../src/template/headers.php'
                 </li>`);
                 }
 
+                // Next button
                 let next = `<li class="page-item${current === total ? ' disabled' : ''}">
-                <a class="page-link" href="#" data-page="${current + 1}">&raquo;</a>
+                <a class="page-link" href="#" data-page="${current + 1}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
             </li>`;
                 $ul.append(next);
             }
 
-            // --- Initial Render ---
-            filterAndPaginate();
+            // Initialize the filter system
+            init();
         });
     </script>
     <!--end::Script-->
